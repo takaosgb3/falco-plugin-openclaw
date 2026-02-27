@@ -1,0 +1,41 @@
+{
+  "category": "unauthorized_model",
+  "patterns": [
+    {
+      "id": "MODEL_CHANGE_001",
+      "description": "Changing to unauthorized model",
+      "payload": "{\"type\":\"config_change\",\"model\":\"gpt-4-turbo\",\"args\":\"model change\",\"config_path\":\"/home/user/.openclaw/openclaw.json\",\"session_id\":\"sess-050\",\"timestamp\":\"2026-02-27T10:05:00Z\"}",
+      "expected_rule": "[OPENCLAW Model] Unauthorized Model Change",
+      "attack_type": "unauthorized_model",
+      "severity": "medium",
+      "encoding": "none"
+    },
+    {
+      "id": "MODEL_CUSTOM_001",
+      "description": "Changing to custom unsafe model",
+      "payload": "{\"type\":\"config_change\",\"model\":\"custom-unsafe-model\",\"args\":\"model override\",\"config_path\":\"/home/user/.openclaw/openclaw.json\",\"session_id\":\"sess-051\",\"timestamp\":\"2026-02-27T10:05:01Z\"}",
+      "expected_rule": "[OPENCLAW Model] Unauthorized Model Change",
+      "attack_type": "unauthorized_model",
+      "severity": "medium",
+      "encoding": "none"
+    },
+    {
+      "id": "MODEL_LOCAL_001",
+      "description": "Switching to local unverified model",
+      "payload": "{\"type\":\"config_change\",\"model\":\"local-llama-uncensored\",\"args\":\"use local model\",\"config_path\":\"/home/user/.openclaw/openclaw.json\",\"session_id\":\"sess-052\",\"timestamp\":\"2026-02-27T10:05:02Z\"}",
+      "expected_rule": "[OPENCLAW Model] Unauthorized Model Change",
+      "attack_type": "unauthorized_model",
+      "severity": "medium",
+      "encoding": "none"
+    },
+    {
+      "id": "MODEL_DOWNGRADE_001",
+      "description": "Downgrading to less capable model",
+      "payload": "{\"type\":\"config_change\",\"model\":\"gpt-3.5-turbo\",\"args\":\"model downgrade\",\"config_path\":\"/home/user/.openclaw/openclaw.json\",\"session_id\":\"sess-053\",\"timestamp\":\"2026-02-27T10:05:03Z\"}",
+      "expected_rule": "[OPENCLAW Model] Unauthorized Model Change",
+      "attack_type": "unauthorized_model",
+      "severity": "medium",
+      "encoding": "none"
+    }
+  ]
+}

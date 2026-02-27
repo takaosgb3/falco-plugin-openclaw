@@ -1,0 +1,209 @@
+# Falco Rules for openclaw plugin
+# All rules MUST have "source: openclaw" (P003)
+# Do NOT use evt.type in plugin rules (P005)
+# Use icontains for case-insensitive security pattern matching
+
+# --- Lists ---
+
+- list: openclaw_dangerous_commands
+  items: [
+    "rm -rf /", "rm -rf /*", "rm -rf ~", "chmod 777",
+    "mkfs", "dd if=", "> /dev/sd", "shutdown", "reboot",
+    "kill -9 1", "killall", ":(){:|:&};:",
+    "iptables -f", "crontab -r"
+  ]
+
+- list: openclaw_exfil_tools
+  items: [
+    "curl", "wget", "nc ", "ncat", "scp ", "rsync"
+  ]
+
+- list: openclaw_sensitive_data
+  items: [
+    "/etc/passwd", "/etc/shadow", ".ssh/id_",
+    ".env", "credentials", "secret", "token",
+    ".aws/credentials", ".kube/config",
+    "openclaw.json"
+  ]
+
+- list: openclaw_escape_paths
+  items: [
+    "/etc/passwd", "/etc/shadow", "/etc/sudoers",
+    "/root/", "/proc/", "/sys/", "/dev/",
+    "/boot/", "/sbin/"
+  ]
+
+- list: openclaw_shell_metacharacters
+  items: [
+    "$(", "`", "; ", "&&", "||",
+    "| ", "> ", ">> "
+  ]
+
+- list: openclaw_suspicious_configs
+  items: [
+    "dm_policy", "allow_all", "disable_auth",
+    "skip_verification", "no_verify", "trust_all",
+    "insecure", "disable_security", "bypass"
+  ]
+
+- list: openclaw_runaway_indicators
+  items: [
+    "infinite loop", "while true", "while :;",
+    "max retries exceeded", "recursion depth",
+    "stack overflow"
+  ]
+
+# --- Detection Rules ---
+
+- rule: "[OPENCLAW DangerousCmd] Dangerous Command Execution"
+  desc: Detects dangerous shell commands executed by the AI agent
+  condition: >
+    openclaw.tool icontains "bash"
+    and (openclaw.args icontains "rm -rf /"
+    or openclaw.args icontains "chmod 777"
+    or openclaw.args icontains "mkfs"
+    or openclaw.args icontains "dd if="
+    or openclaw.args icontains "> /dev/sd"
+    or openclaw.args icontains "shutdown"
+    or openclaw.args icontains "reboot"
+    or openclaw.args icontains "kill -9 1"
+    or openclaw.args icontains "killall"
+    or openclaw.args icontains ":(){:|:&};:"
+    or openclaw.args icontains "iptables -f"
+    or openclaw.args icontains "crontab -r")
+  output: >
+    [OPENCLAW DangerousCmd] Dangerous command detected
+    (tool=%openclaw.tool
+    args=%openclaw.args
+    session=%openclaw.session_id
+    source=%openclaw.source_file)
+  priority: CRITICAL
+  source: openclaw
+  tags: [security, dangerous_command, openclaw]
+
+- rule: "[OPENCLAW DataExfil] Data Exfiltration Attempt"
+  desc: Detects attempts to exfiltrate sensitive data via network tools
+  condition: >
+    (openclaw.args icontains "curl"
+    or openclaw.args icontains "wget"
+    or openclaw.args icontains "nc "
+    or openclaw.args icontains "scp ")
+    and (openclaw.args icontains "/etc/passwd"
+    or openclaw.args icontains ".ssh/id_"
+    or openclaw.args icontains ".env"
+    or openclaw.args icontains "credentials"
+    or openclaw.args icontains "secret"
+    or openclaw.args icontains "token"
+    or openclaw.args icontains ".aws/credentials"
+    or openclaw.args icontains "openclaw.json")
+  output: >
+    [OPENCLAW DataExfil] Data exfiltration attempt detected
+    (tool=%openclaw.tool
+    args=%openclaw.args
+    session=%openclaw.session_id
+    source=%openclaw.source_file)
+  priority: CRITICAL
+  source: openclaw
+  tags: [security, data_exfiltration, openclaw]
+
+- rule: "[OPENCLAW Runaway] Agent Runaway Detected"
+  desc: Detects AI agent runaway behavior (infinite loops, excessive retries)
+  condition: >
+    openclaw.args icontains "infinite loop"
+    or openclaw.args icontains "while true"
+    or openclaw.args icontains "while :;"
+    or openclaw.args icontains "max retries exceeded"
+    or openclaw.args icontains "recursion depth"
+    or openclaw.args icontains "stack overflow"
+    or openclaw.suspicious icontains "runaway"
+  output: >
+    [OPENCLAW Runaway] Agent runaway behavior detected
+    (args=%openclaw.args
+    session=%openclaw.session_id
+    suspicious=%openclaw.suspicious
+    source=%openclaw.source_file)
+  priority: WARNING
+  source: openclaw
+  tags: [security, agent_runaway, openclaw]
+
+- rule: "[OPENCLAW Escape] Workspace Escape Attempt"
+  desc: Detects attempts to access files outside the designated workspace
+  condition: >
+    openclaw.args icontains "/etc/passwd"
+    or openclaw.args icontains "/etc/shadow"
+    or openclaw.args icontains "/etc/sudoers"
+    or openclaw.args icontains "/root/"
+    or openclaw.args icontains "/proc/"
+    or openclaw.args icontains "/sys/"
+    or openclaw.args icontains "/dev/"
+    or openclaw.args icontains "/boot/"
+    or openclaw.args icontains "../../"
+  output: >
+    [OPENCLAW Escape] Workspace escape attempt detected
+    (tool=%openclaw.tool
+    args=%openclaw.args
+    session=%openclaw.session_id
+    source=%openclaw.source_file)
+  priority: WARNING
+  source: openclaw
+  tags: [security, workspace_escape, openclaw]
+
+- rule: "[OPENCLAW Config] Suspicious Configuration Change"
+  desc: Detects suspicious changes to security-relevant configuration
+  condition: >
+    openclaw.type = "config_change"
+    and (openclaw.args icontains "dm_policy"
+    or openclaw.args icontains "allow_all"
+    or openclaw.args icontains "disable_auth"
+    or openclaw.args icontains "skip_verification"
+    or openclaw.args icontains "no_verify"
+    or openclaw.args icontains "trust_all"
+    or openclaw.args icontains "insecure"
+    or openclaw.args icontains "bypass")
+  output: >
+    [OPENCLAW Config] Suspicious config change detected
+    (args=%openclaw.args
+    config_path=%openclaw.config_path
+    session=%openclaw.session_id
+    source=%openclaw.source_file)
+  priority: WARNING
+  source: openclaw
+  tags: [security, suspicious_config, openclaw]
+
+- rule: "[OPENCLAW Model] Unauthorized Model Change"
+  desc: Detects unauthorized AI model changes in configuration
+  condition: >
+    openclaw.type = "config_change"
+    and openclaw.model != ""
+  output: >
+    [OPENCLAW Model] Unauthorized model change detected
+    (model=%openclaw.model
+    config_path=%openclaw.config_path
+    session=%openclaw.session_id
+    source=%openclaw.source_file)
+  priority: NOTICE
+  source: openclaw
+  tags: [security, unauthorized_model, openclaw]
+
+- rule: "[OPENCLAW ShellInj] Shell Injection Attempt"
+  desc: Detects shell injection in non-shell tool arguments
+  condition: >
+    openclaw.tool != "bash"
+    and openclaw.tool != "shell"
+    and openclaw.tool != "exec"
+    and openclaw.tool != ""
+    and (openclaw.args icontains "$("
+    or openclaw.args icontains "`"
+    or openclaw.args icontains "; "
+    or openclaw.args icontains "&&"
+    or openclaw.args icontains "||"
+    or openclaw.args icontains "| ")
+  output: >
+    [OPENCLAW ShellInj] Shell injection attempt detected
+    (tool=%openclaw.tool
+    args=%openclaw.args
+    session=%openclaw.session_id
+    source=%openclaw.source_file)
+  priority: WARNING
+  source: openclaw
+  tags: [security, shell_injection, openclaw]

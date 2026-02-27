@@ -1,0 +1,22 @@
+# Falco configuration for openclaw plugin
+# P007: rules_files must use individual file paths (NOT directory paths)
+# P008: load_plugins is REQUIRED (without it, the plugin is ignored)
+# P009: rate: 0 and max_burst: 0 to prevent alert suppression
+
+plugins:
+  - name: openclaw
+    library_path: /usr/share/falco/plugins/libopenclaw-plugin.so
+    init_config: |
+      {"log_paths": ["~/.openclaw/logs/agent.jsonl", "~/.openclaw/logs/tools.jsonl", "~/.openclaw/logs/system.log"]}
+
+# P008: This directive is REQUIRED. Without it, the plugin will not be loaded.
+load_plugins: [openclaw]
+
+# P007: Use individual file paths, NOT directory paths.
+rules_files:
+  - /etc/falco/rules.d/openclaw_rules.yaml
+
+stdout_output:
+  enabled: true
+  rate: 0        # P009: No rate limiting (default may suppress alerts)
+  max_burst: 0   # P009: No burst limiting

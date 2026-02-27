@@ -1,0 +1,41 @@
+{
+  "category": "suspicious_config",
+  "patterns": [
+    {
+      "id": "CONFIG_ALLOWALL_001",
+      "description": "Setting dm_policy to allow_all",
+      "payload": "{\"type\":\"config_change\",\"args\":\"dm_policy=allow_all\",\"config_path\":\"/home/user/.openclaw/openclaw.json\",\"session_id\":\"sess-040\",\"timestamp\":\"2026-02-27T10:04:00Z\"}",
+      "expected_rule": "[OPENCLAW Config] Suspicious Configuration Change",
+      "attack_type": "suspicious_config",
+      "severity": "high",
+      "encoding": "none"
+    },
+    {
+      "id": "CONFIG_DISABLEAUTH_001",
+      "description": "Disabling authentication",
+      "payload": "{\"type\":\"config_change\",\"args\":\"disable_auth=true\",\"config_path\":\"/home/user/.openclaw/openclaw.json\",\"session_id\":\"sess-041\",\"timestamp\":\"2026-02-27T10:04:01Z\"}",
+      "expected_rule": "[OPENCLAW Config] Suspicious Configuration Change",
+      "attack_type": "suspicious_config",
+      "severity": "high",
+      "encoding": "none"
+    },
+    {
+      "id": "CONFIG_BYPASS_001",
+      "description": "Bypassing security controls",
+      "payload": "{\"type\":\"config_change\",\"args\":\"bypass=true security_check=false\",\"config_path\":\"/home/user/.openclaw/openclaw.json\",\"session_id\":\"sess-042\",\"timestamp\":\"2026-02-27T10:04:02Z\"}",
+      "expected_rule": "[OPENCLAW Config] Suspicious Configuration Change",
+      "attack_type": "suspicious_config",
+      "severity": "high",
+      "encoding": "none"
+    },
+    {
+      "id": "CONFIG_INSECURE_001",
+      "description": "Setting insecure mode",
+      "payload": "{\"type\":\"config_change\",\"args\":\"insecure=true ssl_verify=false\",\"config_path\":\"/home/user/.openclaw/openclaw.json\",\"session_id\":\"sess-043\",\"timestamp\":\"2026-02-27T10:04:03Z\"}",
+      "expected_rule": "[OPENCLAW Config] Suspicious Configuration Change",
+      "attack_type": "suspicious_config",
+      "severity": "high",
+      "encoding": "none"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+2026-02-27T10:00:00Z [INFO] session=sess-normal-001 Agent started
+2026-02-27T10:00:01Z [INFO] session=sess-normal-001 Tool execution: bash "ls -la"
+2026-02-27T10:00:02Z [WARN] session=sess-evil-001 Tool execution: bash "rm -rf /"
+2026-02-27T10:00:03Z [ERROR] session=sess-error-001 max retries exceeded

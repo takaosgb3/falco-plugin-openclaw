@@ -1,0 +1,50 @@
+{
+  "category": "dangerous_command",
+  "patterns": [
+    {
+      "id": "DANGCMD_RMRF_001",
+      "description": "rm -rf / destructive command",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"bash\",\"args\":\"rm -rf /\",\"session_id\":\"sess-001\",\"timestamp\":\"2026-02-27T10:00:00Z\"}",
+      "expected_rule": "[OPENCLAW DangerousCmd] Dangerous Command Execution",
+      "attack_type": "dangerous_command",
+      "severity": "critical",
+      "encoding": "none"
+    },
+    {
+      "id": "DANGCMD_CHMOD_001",
+      "description": "chmod 777 on system directory",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"bash\",\"args\":\"chmod 777 /etc\",\"session_id\":\"sess-002\",\"timestamp\":\"2026-02-27T10:00:01Z\"}",
+      "expected_rule": "[OPENCLAW DangerousCmd] Dangerous Command Execution",
+      "attack_type": "dangerous_command",
+      "severity": "critical",
+      "encoding": "none"
+    },
+    {
+      "id": "DANGCMD_DD_001",
+      "description": "dd command targeting disk device",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"bash\",\"args\":\"dd if=/dev/zero of=/dev/sda bs=1M\",\"session_id\":\"sess-003\",\"timestamp\":\"2026-02-27T10:00:02Z\"}",
+      "expected_rule": "[OPENCLAW DangerousCmd] Dangerous Command Execution",
+      "attack_type": "dangerous_command",
+      "severity": "critical",
+      "encoding": "none"
+    },
+    {
+      "id": "DANGCMD_FORKBOMB_001",
+      "description": "Fork bomb execution",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"bash\",\"args\":\":(){:|:&};:\",\"session_id\":\"sess-004\",\"timestamp\":\"2026-02-27T10:00:03Z\"}",
+      "expected_rule": "[OPENCLAW DangerousCmd] Dangerous Command Execution",
+      "attack_type": "dangerous_command",
+      "severity": "critical",
+      "encoding": "none"
+    },
+    {
+      "id": "DANGCMD_SHUTDOWN_001",
+      "description": "System shutdown command",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"bash\",\"args\":\"shutdown -h now\",\"session_id\":\"sess-005\",\"timestamp\":\"2026-02-27T10:00:04Z\"}",
+      "expected_rule": "[OPENCLAW DangerousCmd] Dangerous Command Execution",
+      "attack_type": "dangerous_command",
+      "severity": "critical",
+      "encoding": "none"
+    }
+  ]
+}

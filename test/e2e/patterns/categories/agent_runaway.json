@@ -1,0 +1,41 @@
+{
+  "category": "agent_runaway",
+  "patterns": [
+    {
+      "id": "RUNAWAY_LOOP_001",
+      "description": "Infinite while true loop",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"bash\",\"args\":\"while true; do echo loop; done\",\"session_id\":\"sess-020\",\"timestamp\":\"2026-02-27T10:02:00Z\"}",
+      "expected_rule": "[OPENCLAW Runaway] Agent Runaway Detected",
+      "attack_type": "agent_runaway",
+      "severity": "high",
+      "encoding": "none"
+    },
+    {
+      "id": "RUNAWAY_RETRIES_001",
+      "description": "Max retries exceeded error",
+      "payload": "{\"type\":\"system\",\"args\":\"max retries exceeded for API call\",\"session_id\":\"sess-021\",\"timestamp\":\"2026-02-27T10:02:01Z\"}",
+      "expected_rule": "[OPENCLAW Runaway] Agent Runaway Detected",
+      "attack_type": "agent_runaway",
+      "severity": "high",
+      "encoding": "none"
+    },
+    {
+      "id": "RUNAWAY_RECURSION_001",
+      "description": "Recursion depth limit exceeded",
+      "payload": "{\"type\":\"system\",\"args\":\"recursion depth limit reached\",\"session_id\":\"sess-022\",\"timestamp\":\"2026-02-27T10:02:02Z\"}",
+      "expected_rule": "[OPENCLAW Runaway] Agent Runaway Detected",
+      "attack_type": "agent_runaway",
+      "severity": "high",
+      "encoding": "none"
+    },
+    {
+      "id": "RUNAWAY_INFINITE_001",
+      "description": "Infinite loop detected in agent",
+      "payload": "{\"type\":\"system\",\"args\":\"infinite loop detected in task execution\",\"session_id\":\"sess-023\",\"timestamp\":\"2026-02-27T10:02:03Z\"}",
+      "expected_rule": "[OPENCLAW Runaway] Agent Runaway Detected",
+      "attack_type": "agent_runaway",
+      "severity": "high",
+      "encoding": "none"
+    }
+  ]
+}

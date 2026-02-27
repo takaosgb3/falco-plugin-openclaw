@@ -1,0 +1,41 @@
+{
+  "category": "workspace_escape",
+  "patterns": [
+    {
+      "id": "ESCAPE_PASSWD_001",
+      "description": "Reading /etc/passwd via tool",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"read\",\"args\":\"/etc/passwd\",\"session_id\":\"sess-030\",\"timestamp\":\"2026-02-27T10:03:00Z\"}",
+      "expected_rule": "[OPENCLAW Escape] Workspace Escape Attempt",
+      "attack_type": "workspace_escape",
+      "severity": "high",
+      "encoding": "none"
+    },
+    {
+      "id": "ESCAPE_ROOT_001",
+      "description": "Accessing /root/ directory",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"read\",\"args\":\"/root/.bashrc\",\"session_id\":\"sess-031\",\"timestamp\":\"2026-02-27T10:03:01Z\"}",
+      "expected_rule": "[OPENCLAW Escape] Workspace Escape Attempt",
+      "attack_type": "workspace_escape",
+      "severity": "high",
+      "encoding": "none"
+    },
+    {
+      "id": "ESCAPE_PROC_001",
+      "description": "Accessing /proc/self/environ",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"read\",\"args\":\"/proc/self/environ\",\"session_id\":\"sess-032\",\"timestamp\":\"2026-02-27T10:03:02Z\"}",
+      "expected_rule": "[OPENCLAW Escape] Workspace Escape Attempt",
+      "attack_type": "workspace_escape",
+      "severity": "high",
+      "encoding": "none"
+    },
+    {
+      "id": "ESCAPE_TRAVERSAL_001",
+      "description": "Path traversal to escape workspace",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"read\",\"args\":\"../../../../../../etc/passwd\",\"session_id\":\"sess-033\",\"timestamp\":\"2026-02-27T10:03:03Z\"}",
+      "expected_rule": "[OPENCLAW Escape] Workspace Escape Attempt",
+      "attack_type": "workspace_escape",
+      "severity": "high",
+      "encoding": "none"
+    }
+  ]
+}
