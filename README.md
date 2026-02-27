@@ -1,53 +1,71 @@
 # Falco OpenClaw Plugin
 
+[![CI](https://github.com/takaosgb3/falco-plugin-openclaw/actions/workflows/ci.yml/badge.svg)](https://github.com/takaosgb3/falco-plugin-openclaw/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Go Version](https://img.shields.io/badge/Go-1.22-00ADD8.svg)](https://go.dev/)
+
 A Falco plugin for monitoring OpenClaw AI assistant logs and detecting security threats in real-time.
 
-## Features
+OpenClaw AI アシスタントのログをリアルタイム監視し、セキュリティ脅威を検出する Falco プラグインです。
 
-- Real-time monitoring of 3 log files simultaneously (JSONL + plaintext)
-- Security threat detection:
-  - Dangerous Command Execution
-  - Data Exfiltration Attempts
-  - Agent Runaway Behavior
-  - Workspace Escape Attempts
-  - Suspicious Configuration Changes
-  - Unauthorized Model Changes
-  - Shell Injection in Non-Shell Tools
-- JSON and plaintext log format support
-- URL decoding support (up to 3 levels)
-- Customizable Falco rules
+## Features / 機能
 
-## Requirements
+- Real-time monitoring of multiple log files (JSONL + plaintext) / 複数ログファイルのリアルタイム監視
+- Auto-detection of JSON and plaintext log formats / JSON・プレーンテキスト形式の自動検出
+- 7 security threat detection categories / 7種類のセキュリティ脅威検出
+- String-matching based detection (no regex, ReDoS-safe) / 文字列マッチングベースの検出（正規表現不使用、ReDoS安全）
+- Debug mode via environment variable / 環境変数によるデバッグモード
+
+## Security Rules / セキュリティルール
+
+| Rule | Description / 説明 | Priority |
+|------|---------------------|----------|
+| Dangerous Command | Detects dangerous shell commands (rm -rf, chmod 777, fork bombs) / 危険なシェルコマンドの検出 | CRITICAL |
+| Data Exfiltration | Detects sensitive data exfiltration via network tools / ネットワークツールによる機密データ流出の検出 | CRITICAL |
+| Agent Runaway | Detects infinite loops and excessive retries / 無限ループ・過剰リトライの検出 | WARNING |
+| Workspace Escape | Detects access to files outside the workspace / ワークスペース外ファイルアクセスの検出 | WARNING |
+| Suspicious Config | Detects suspicious configuration changes / 不審な設定変更の検出 | WARNING |
+| Unauthorized Model | Detects unauthorized AI model changes / 不正な AI モデル変更の検出 | NOTICE |
+| Shell Injection | Detects shell metacharacters in non-shell tools / 非シェルツールでのシェルインジェクションの検出 | WARNING |
+
+## Quick Start / クイックスタート
+
+### Requirements / 要件
 
 - Falco 0.36.0+
-- Go 1.22+ (for building from source)
-- Linux (for running the plugin)
+- Linux (for running the plugin / プラグイン実行用)
+- Go 1.22+ (for building from source / ソースからビルドする場合のみ)
 
-## Quick Start
-
-### Installation
+### Installation / インストール
 
 ```bash
-# Download the plugin binary
-wget https://github.com/takaos/falco-openclaw-plugin/releases/latest/download/libopenclaw-plugin-linux-amd64.so
+# Download plugin binary / プラグインバイナリをダウンロード
+wget https://github.com/takaosgb3/falco-plugin-openclaw/releases/latest/download/libopenclaw-plugin-linux-amd64.so
 
-# Copy to Falco plugins directory
+# Copy to Falco plugins directory / Falco プラグインディレクトリにコピー
 sudo cp libopenclaw-plugin-linux-amd64.so /usr/share/falco/plugins/libopenclaw-plugin.so
 
-# Copy rules
-sudo cp rules/openclaw_rules.yaml /etc/falco/rules.d/
+# Copy rules / ルールをコピー
+wget https://github.com/takaosgb3/falco-plugin-openclaw/releases/latest/download/openclaw_rules.yaml
+sudo cp openclaw_rules.yaml /etc/falco/rules.d/
 ```
 
-### Configuration
+### Configuration / 設定
 
-Add to your `falco.yaml`:
+Add to your `falco.yaml` / `falco.yaml` に追加:
 
 ```yaml
 plugins:
   - name: openclaw
     library_path: /usr/share/falco/plugins/libopenclaw-plugin.so
     init_config: |
-      {"log_paths": ["~/.openclaw/logs/agent.jsonl", "~/.openclaw/logs/tools.jsonl", "~/.openclaw/logs/system.log"]}
+      {
+        "log_paths": [
+          "~/.openclaw/logs/agent.jsonl",
+          "~/.openclaw/logs/tools.jsonl",
+          "~/.openclaw/logs/system.log"
+        ]
+      }
 
 load_plugins: [openclaw]
 
@@ -56,72 +74,72 @@ rules_files:
 
 stdout_output:
   enabled: true
+
+outputs:
   rate: 0
   max_burst: 0
 ```
 
-### Running
+> **Important / 重要**: `load_plugins: [openclaw]` is required. Without it, the plugin is silently ignored. / `load_plugins: [openclaw]` は必須です。これがないとプラグインは無視されます。
+
+### Running / 実行
 
 ```bash
-# Run Falco with the plugin (plugin-only mode)
 sudo falco -c /etc/falco/falco.yaml --disable-source syscall
 ```
 
-## Building from Source
+## Plugin Fields / プラグインフィールド
+
+| Field | Type | Description / 説明 |
+|-------|------|---------------------|
+| `openclaw.type` | string | Event type (tool_call, message, config_change, system) / イベントタイプ |
+| `openclaw.tool` | string | Tool name (bash, read, write, etc.) / ツール名 |
+| `openclaw.args` | string | Tool arguments / ツール引数 |
+| `openclaw.session_id` | string | Session identifier / セッションID |
+| `openclaw.timestamp` | string | Event timestamp (RFC3339) / タイムスタンプ |
+| `openclaw.source_file` | string | Source log file name / ソースログファイル名 |
+| `openclaw.user_message` | string | User message content / ユーザメッセージ |
+| `openclaw.model` | string | AI model name / AI モデル名 |
+| `openclaw.config_path` | string | Configuration file path / 設定ファイルパス |
+| `openclaw.suspicious` | string | Security threat type detected / 検出されたセキュリティ脅威タイプ |
+| `openclaw.log_path` | string | Log file path / ログファイルパス |
+| `openclaw.raw` | string | Raw log line / 生ログ行 |
+| `openclaw.headers[key]` | string | Extra metadata by key / キーによる追加メタデータ |
+
+## Building from Source / ソースからのビルド
 
 ```bash
-# Clone the repository
-git clone https://github.com/takaos/falco-openclaw-plugin.git
-cd falco-openclaw-plugin
+git clone https://github.com/takaosgb3/falco-plugin-openclaw.git
+cd falco-plugin-openclaw
 
-# Build (Linux only)
-make build
-
-# Run tests
-make test
-
-# Verify the binary
-make verify
+make build          # Development build / 開発ビルド
+make build-release  # Optimized release build / リリースビルド
+make test           # Run tests / テスト実行
+make verify         # Verify binary / バイナリ検証
 ```
 
-## Security Rules
+See [BUILD.md](BUILD.md) for detailed instructions. / 詳細は [BUILD.md](BUILD.md) を参照してください。
 
-| Rule | Description | Priority |
-|------|-------------|----------|
-| Dangerous Command | Detects dangerous shell commands (rm -rf, chmod 777, etc.) | CRITICAL |
-| Data Exfiltration | Detects sensitive data being sent via network tools | CRITICAL |
-| Agent Runaway | Detects infinite loops and excessive retries | WARNING |
-| Workspace Escape | Detects access to files outside the workspace | WARNING |
-| Suspicious Config | Detects suspicious configuration changes | WARNING |
-| Unauthorized Model | Detects unauthorized AI model changes | NOTICE |
-| Shell Injection | Detects shell metacharacters in non-shell tools | WARNING |
+## Docker
 
-## Plugin Fields
+```bash
+docker build -t falco-openclaw .
+docker run --rm -v ~/.openclaw/logs:/openclaw-logs/logs:ro falco-openclaw
+```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `openclaw.type` | string | Event type (tool_call, message, config_change, system) |
-| `openclaw.tool` | string | Tool name (bash, read, write, etc.) |
-| `openclaw.args` | string | Tool arguments |
-| `openclaw.session_id` | string | Session identifier |
-| `openclaw.timestamp` | string | Event timestamp |
-| `openclaw.source_file` | string | Source log file name |
-| `openclaw.user_message` | string | User message content |
-| `openclaw.model` | string | AI model name |
-| `openclaw.config_path` | string | Configuration file path |
-| `openclaw.suspicious` | string | Security threat type detected |
-| `openclaw.log_path` | string | Log file path |
-| `openclaw.raw` | string | Raw log line |
-| `openclaw.headers[key]` | string | Extra metadata |
+## Documentation / ドキュメント
 
-## Debug Mode
+- [Installation Guide / インストールガイド](docs/installation.md)
+- [Configuration Guide / 設定ガイド](docs/configuration.md)
+- [Build Instructions / ビルド手順](BUILD.md)
+- [Changelog / 変更履歴](CHANGELOG.md)
 
-Enable debug logging:
+## Debug Mode / デバッグモード
 
 ```bash
 export FALCO_OPENCLAW_DEBUG=true
 ```
 
-## License
+## License / ライセンス
 
-Apache-2.0
+[Apache-2.0](LICENSE)
