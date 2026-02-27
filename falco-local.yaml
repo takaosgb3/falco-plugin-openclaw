@@ -1,0 +1,20 @@
+# Local Falco configuration for openclaw plugin (macOS)
+plugins:
+  - name: openclaw
+    library_path: ./libopenclaw-plugin-darwin-arm64.dylib
+    init_config: |
+      {"log_paths": ["~/.openclaw/agents/main/sessions/", "~/.openclaw/logs/config-audit.jsonl", "~/.openclaw/logs/gateway.log"]}
+
+load_plugins: [openclaw]
+
+rules_files:
+  - ./rules/openclaw_rules.yaml
+
+stdout_output:
+  enabled: true
+
+json_output: true
+
+outputs:
+  rate: 0
+  max_burst: 0

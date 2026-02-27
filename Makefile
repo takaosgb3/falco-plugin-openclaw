@@ -1,8 +1,21 @@
 PLUGIN_NAME := openclaw
-BINARY := lib$(PLUGIN_NAME)-plugin-linux-amd64.so
 SRC_DIR := ./cmd/plugin-sdk
 GO_BUILD_FLAGS := -buildmode=c-shared
-GO_ENV := CGO_ENABLED=1 GOOS=linux GOARCH=amd64
+
+UNAME_S := $(shell uname -s)
+UNAME_M := $(shell uname -m)
+ifeq ($(UNAME_S),Darwin)
+  ifeq ($(UNAME_M),arm64)
+    BINARY := lib$(PLUGIN_NAME)-plugin-darwin-arm64.dylib
+    GO_ENV := CGO_ENABLED=1 GOOS=darwin GOARCH=arm64
+  else
+    BINARY := lib$(PLUGIN_NAME)-plugin-darwin-amd64.dylib
+    GO_ENV := CGO_ENABLED=1 GOOS=darwin GOARCH=amd64
+  endif
+else
+  BINARY := lib$(PLUGIN_NAME)-plugin-linux-amd64.so
+  GO_ENV := CGO_ENABLED=1 GOOS=linux GOARCH=amd64
+endif
 
 .PHONY: build test lint clean verify package vet
 
