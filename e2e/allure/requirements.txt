@@ -1,0 +1,4 @@
+# E2E Test Dependencies for Allure Report
+pytest>=7.0.0
+allure-pytest==2.15.0
+pytest-cov>=4.0.0
