@@ -1,4 +1,6 @@
 # Local Falco configuration for openclaw plugin (macOS)
+# Requires: Falco 0.43.0+ built with MINIMAL_BUILD=ON
+# Run with: falco -c falco-local.yaml --disable-source syscall -U
 plugins:
   - name: openclaw
     library_path: ./libopenclaw-plugin-darwin-arm64.dylib
@@ -14,7 +16,3 @@ stdout_output:
   enabled: true
 
 json_output: true
-
-outputs:
-  rate: 0
-  max_burst: 0
