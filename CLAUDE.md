@@ -18,6 +18,7 @@ make verify         # Build + verify binary is valid ELF shared object
 make clean          # Remove build artifacts
 make e2e            # Run E2E Level 1 + Level 2 tests
 make e2e-all        # Run all E2E levels + Allure report
+make e2e-deploy-local # Deploy local test results to GitHub Pages
 ```
 
 Run a single test:
@@ -101,6 +102,7 @@ make e2e-native        # Level 3 on macOS (requires local Falco)
 make e2e-ci            # Level 3 on Linux CI
 make e2e-all           # All levels + Allure report
 make e2e-report        # Generate Allure report from Level 3 results
+make e2e-deploy-local  # Deploy local test results to GitHub Pages
 ```
 
 See `e2e/README.md` for detailed E2E test documentation.

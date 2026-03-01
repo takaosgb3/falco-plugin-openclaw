@@ -86,7 +86,12 @@ make e2e-report
 
 # Open report in browser
 make e2e-serve
+
+# Deploy results to GitHub Pages
+make e2e-deploy-local
 ```
+
+Reports are published to [GitHub Pages](https://takaosgb3.github.io/falco-plugin-openclaw/). Each run is archived as an immutable numbered report with trend history.
 
 ## Directory Structure
 
@@ -94,7 +99,10 @@ make e2e-serve
 e2e/
 ├── scripts/
 │   ├── inject_patterns.sh    # Pattern injection + Falco execution
-│   └── batch_analyzer.py     # Result analysis
+│   ├── batch_analyzer.py     # Result analysis
+│   ├── deploy_local.sh       # Deploy local results to GitHub Pages
+│   ├── generate_rule_mapping_trend.py       # Merge Rule Mapping into Allure trends
+│   └── generate_rule_mapping_trend_html.py  # Generate Rule Mapping Trend HTML + history
 ├── allure/
 │   ├── conftest.py            # pytest configuration
 │   ├── test_e2e_wrapper.py    # Allure report wrapper
@@ -174,6 +182,11 @@ make e2e-pipeline
 
 テストパターンをログファイルに注入し、プラグインと共にFalcoを実行し、アラート出力を分析します。
 
+**Linux CI:**
+```bash
+make e2e-ci
+```
+
 **macOSネイティブ**（ソースからビルドしたFalcoが必要）:
 ```bash
 make e2e-native
@@ -190,7 +203,12 @@ make e2e-report
 
 # ブラウザでレポート表示
 make e2e-serve
+
+# テスト結果をGitHub Pagesにデプロイ
+make e2e-deploy-local
 ```
+
+レポートは [GitHub Pages](https://takaosgb3.github.io/falco-plugin-openclaw/) に公開されます。各実行は番号付きの不変アーカイブとしてトレンド履歴付きで保存されます。
 
 ## トラブルシューティング
 

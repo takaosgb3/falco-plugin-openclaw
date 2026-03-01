@@ -47,6 +47,9 @@ make e2e-ci         # Linux CI
 
 # All E2E levels + Allure report
 make e2e-all
+
+# Deploy local test results to GitHub Pages
+make e2e-deploy-local
 ```
 
 ## Cross-Compilation Note
@@ -54,7 +57,7 @@ make e2e-all
 The plugin must be built as a **C shared library** (`-buildmode=c-shared`), which requires CGO. This means:
 
 - **Linux → Linux**: Works directly
-- **macOS → macOS**: Produces `.dylib` for local testing only
+- **macOS → macOS**: Produces `.dylib` (also available as a release artifact via CI)
 - **macOS → Linux**: **Not possible** with CGO. Use Docker or a Linux machine.
 
 ## Docker Build
@@ -103,7 +106,9 @@ make verify         # バイナリ形式の検証
 make package        # リリースパッケージ作成
 make e2e            # E2Eテスト（レベル1+2、Falco不要）
 make e2e-native     # E2Eレベル3統合テスト（macOS、Falco必要）
+make e2e-ci         # E2Eレベル3統合テスト（Linux CI）
 make e2e-all        # 全E2Eレベル + Allureレポート
+make e2e-deploy-local # ローカルのテスト結果をGitHub Pagesにデプロイ
 ```
 
 ## クロスコンパイルの注意

@@ -7,14 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-03-01
+
 ### Added
 - Comprehensive E2E test suite with 3 levels (pattern, pipeline, Falco integration)
 - 56 test patterns across 11 categories (7 threat + benign + edge cases + composite + plaintext)
 - Level 3 integration test scripts (inject_patterns.sh, batch_analyzer.py)
-- Allure report generation for visual test results
+- Allure report generation with rich Markdown detail view and keyword highlighting
+- Allure report auto-deployment to GitHub Pages with trend history
+- Rule Mapping Trend charts (stacked trend + mismatch detail)
 - E2E CI workflow (.github/workflows/e2e-test.yml)
-- Makefile E2E targets (e2e, e2e-pattern, e2e-pipeline, e2e-ci, e2e-native, e2e-all)
+- Makefile E2E targets (e2e, e2e-pattern, e2e-pipeline, e2e-ci, e2e-native, e2e-all, e2e-deploy-local)
+- Local deploy script (e2e/scripts/deploy_local.sh) for deploying test results to GitHub Pages
 - E2E test documentation (e2e/README.md)
+
+### Changed
+- Release workflow now builds both Linux amd64 (.so) and macOS ARM64 (.dylib) binaries
+- Allure test IDs use zero-padded sequential prefix (01_PATTERN, 02_PATTERN...) for consistent ordering
 
 ## [0.1.0] - 2026-02-27
 

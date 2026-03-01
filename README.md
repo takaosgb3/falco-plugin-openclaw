@@ -33,10 +33,12 @@ A Falco plugin for monitoring OpenClaw AI assistant logs and detecting security 
 ### Requirements
 
 - Falco 0.36.0+
-- Linux
+- Linux (amd64) or macOS (ARM64)
 - Go 1.22+ (for building from source only)
 
 ### Installation
+
+**Linux (amd64)**
 
 ```bash
 # Download plugin binary
@@ -49,6 +51,18 @@ sudo cp libopenclaw-plugin-linux-amd64.so /usr/share/falco/plugins/libopenclaw-p
 wget https://github.com/takaosgb3/falco-plugin-openclaw/releases/latest/download/openclaw_rules.yaml
 sudo cp openclaw_rules.yaml /etc/falco/rules.d/
 ```
+
+**macOS (ARM64)**
+
+```bash
+# Download plugin binary
+curl -LO https://github.com/takaosgb3/falco-plugin-openclaw/releases/latest/download/libopenclaw-plugin-darwin-arm64.dylib
+
+# Download rules
+curl -LO https://github.com/takaosgb3/falco-plugin-openclaw/releases/latest/download/openclaw_rules.yaml
+```
+
+> **Note**: macOS requires Falco 0.43.0 built from source with `MINIMAL_BUILD=ON`. See [BUILD.md](BUILD.md) for details.
 
 ### Configuration
 
@@ -136,9 +150,12 @@ make e2e
 
 # Run all levels + Allure report (requires Falco)
 make e2e-all
+
+# Deploy local test results to GitHub Pages
+make e2e-deploy-local
 ```
 
-56 test patterns cover 11 categories including edge cases, composite threats, and benign patterns. See [e2e/README.md](e2e/README.md) for full details.
+56 test patterns cover 11 categories including edge cases, composite threats, and benign patterns. Results are deployed as [Allure reports on GitHub Pages](https://takaosgb3.github.io/falco-plugin-openclaw/). See [e2e/README.md](e2e/README.md) for full details.
 
 ## Docker
 
