@@ -120,6 +120,26 @@ make verify         # Verify binary
 
 See [BUILD.md](BUILD.md) for detailed instructions.
 
+## E2E Testing
+
+The plugin includes a comprehensive E2E test suite with three levels:
+
+| Level | Description | Falco Required | Command |
+|-------|-------------|----------------|---------|
+| Level 1 | Pattern coverage tests (Go) | No | `make e2e-pattern` |
+| Level 2 | Plugin pipeline tests (Go) | No | `make e2e-pipeline` |
+| Level 3 | Falco integration tests | Yes | `make e2e-native` |
+
+```bash
+# Run Level 1 + Level 2 (no Falco needed)
+make e2e
+
+# Run all levels + Allure report (requires Falco)
+make e2e-all
+```
+
+56 test patterns cover 11 categories including edge cases, composite threats, and benign patterns. See [e2e/README.md](e2e/README.md) for full details.
+
 ## Docker
 
 ```bash
@@ -132,6 +152,7 @@ docker run --rm -v ~/.openclaw/logs:/openclaw-logs/logs:ro falco-openclaw
 - [Installation Guide](docs/installation.md)
 - [Configuration Guide](docs/configuration.md)
 - [Build Instructions](BUILD.md)
+- [E2E Test Guide](e2e/README.md)
 - [Changelog](CHANGELOG.md)
 
 ## Debug Mode

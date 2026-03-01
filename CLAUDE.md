@@ -16,6 +16,8 @@ make lint           # golangci-lint run (requires golangci-lint installed)
 make vet            # go vet ./...
 make verify         # Build + verify binary is valid ELF shared object
 make clean          # Remove build artifacts
+make e2e            # Run E2E Level 1 + Level 2 tests
+make e2e-all        # Run all E2E levels + Allure report
 ```
 
 Run a single test:
@@ -72,7 +74,43 @@ Rules are in `rules/openclaw_rules.yaml`. All rules must have `source: openclaw`
 
 ## Testing
 
-Tests live in `pkg/parser/parser_test.go`. Test fixture data is in `test/fixtures/sample_logs/` and security pattern test cases are in `test/e2e/patterns/categories/` (one JSON file per threat category).
+### Unit Tests
+
+Parser unit tests in `pkg/parser/parser_test.go` (95.9% coverage). Test fixture data in `test/fixtures/sample_logs/`.
+
+```bash
+make test              # Run all unit tests
+make test-coverage     # Tests with coverage report
+```
+
+### E2E Tests (3 levels)
+
+| Level | Description | Falco Required | Location |
+|-------|-------------|----------------|----------|
+| Level 1 | Pattern coverage tests | No | `test/e2e/e2e_pattern_test.go` |
+| Level 2 | Plugin pipeline tests | No | `cmd/plugin-sdk/plugin_test.go` |
+| Level 3 | Falco integration tests | Yes | `e2e/scripts/` |
+
+Test pattern data: `test/e2e/patterns/categories/` (11 JSON files, 56 patterns total).
+
+```bash
+make e2e               # Level 1 + Level 2 (no Falco)
+make e2e-pattern       # Level 1 only
+make e2e-pipeline      # Level 2 only (requires CGO_ENABLED=1)
+make e2e-native        # Level 3 on macOS (requires local Falco)
+make e2e-ci            # Level 3 on Linux CI
+make e2e-all           # All levels + Allure report
+make e2e-report        # Generate Allure report from Level 3 results
+```
+
+See `e2e/README.md` for detailed E2E test documentation.
+
+### Key E2E Constraints
+
+- **Level 2 requires CGO_ENABLED=1** because plugin-sdk-go has C dependencies
+- **Falco 0.43.0 fires only 1 rule per event** (first matching rule in file order)
+- **Escape rule has no tool condition** — fires on args patterns regardless of tool value
+- **Parser truncation vs Falco**: `DetectThreat()` truncates args >10240B, but `Extract()` returns full args to Falco
 
 ## Linting
 

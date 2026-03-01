@@ -37,6 +37,16 @@ make package
 
 # Clean build artifacts
 make clean
+
+# E2E tests (Level 1 + Level 2, no Falco needed)
+make e2e
+
+# E2E Level 3 integration test (requires Falco)
+make e2e-native     # macOS
+make e2e-ci         # Linux CI
+
+# All E2E levels + Allure report
+make e2e-all
 ```
 
 ## Cross-Compilation Note
@@ -91,6 +101,9 @@ make test-coverage  # カバレッジ付きテスト
 make lint           # リンター実行
 make verify         # バイナリ形式の検証
 make package        # リリースパッケージ作成
+make e2e            # E2Eテスト（レベル1+2、Falco不要）
+make e2e-native     # E2Eレベル3統合テスト（macOS、Falco必要）
+make e2e-all        # 全E2Eレベル + Allureレポート
 ```
 
 ## クロスコンパイルの注意
