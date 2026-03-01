@@ -208,7 +208,10 @@ def pytest_generate_tests(metafunc):
         test_results_path = metafunc.config.getoption("--test-results")
         results = load_test_results(test_results_path)
         if results:
-            metafunc.parametrize("result", results, ids=lambda r: r["pattern_id"])
+            metafunc.parametrize(
+                "result", results,
+                ids=[f"{i:02d}_{r['pattern_id']}" for i, r in enumerate(results, 1)],
+            )
 
 
 def _format_latency(result: dict) -> str:

@@ -86,7 +86,7 @@ E2E_ALLURE_DIR := e2e/allure
 FALCO_BIN ?= falco
 FALCO_BIN_NATIVE ?= /tmp/falco-build/build/userspace/falco/falco
 
-.PHONY: e2e-pattern e2e-pipeline e2e-ci e2e-native e2e-report e2e-serve e2e e2e-all
+.PHONY: e2e-pattern e2e-pipeline e2e-ci e2e-native e2e-report e2e-serve e2e e2e-all e2e-deploy-local
 
 # Level 1: Pattern coverage tests (Go test, no Falco needed)
 e2e-pattern:
@@ -140,6 +140,11 @@ e2e-serve:
 
 # Level 1 + Level 2 combined (CI fast path, no Falco needed)
 e2e: e2e-pattern e2e-pipeline
+
+# Deploy local test results to GitHub Pages
+# Requires: make e2e-native (or e2e-ci) already run, allure CLI installed
+e2e-deploy-local:
+	bash $(E2E_SCRIPTS_DIR)/deploy_local.sh
 
 # All levels + Allure report (full E2E suite)
 # Note: e2e-ci already depends on build, so no explicit build dependency needed here
