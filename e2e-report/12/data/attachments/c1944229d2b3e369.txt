@@ -1,0 +1,3 @@
+Expected Rule: [OPENCLAW Config] Suspicious Configuration Change
+Matched Rule:  [OPENCLAW Config] Suspicious Configuration Change
+Status: MATCH
