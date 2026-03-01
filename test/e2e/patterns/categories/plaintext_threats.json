@@ -63,7 +63,7 @@
         "[OPENCLAW Escape] Workspace Escape Attempt",
         "[OPENCLAW ShellInj] Shell Injection Attempt"
       ],
-      "note": "Both WE and SI match, but parser priority: WE (3rd) > SI (4th). Falco fires both rules."
+      "note": "Both WE and SI match, but parser priority: WE (3rd) > SI (4th). Falco 0.43.0 fires only 1 rule per event; Escape fires first (appears earlier in rules file)."
     }
   ]
 }

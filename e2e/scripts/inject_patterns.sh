@@ -272,7 +272,7 @@ generate_falco_config() {
 plugins:
   - name: openclaw
     library_path: ${library_path}
-    init_config: '{"log_paths":["${log_file_path}"]}'
+    init_config: '{"log_paths":["${log_file_path}"],"event_buffer_size":1000}'
 load_plugins: [openclaw]
 rules_files:
   - ${rules_path}
@@ -306,8 +306,11 @@ start_falco() {
 
     log_info "Falco started (PID: ${FALCO_PID})"
 
-    # Wait for startup completion by monitoring stderr
+    # Wait for startup completion by monitoring stderr for "Enabled event sources:"
+    # Fallback: if process is alive after 5 seconds with no stderr errors, assume ready
+    # (macOS MINIMAL_BUILD does not emit startup messages to stderr)
     local elapsed=0
+    local fallback_sec=5
     while [ "${elapsed}" -lt "${TIMEOUT_SEC}" ]; do
         if ! kill -0 "${FALCO_PID}" 2>/dev/null; then
             log_error "Falco exited prematurely"
@@ -319,9 +322,20 @@ start_falco() {
         fi
 
         if grep -q "Enabled event sources:" "${stderr_file}" 2>/dev/null; then
-            log_info "Falco startup complete (${elapsed}s)"
+            log_info "Falco startup complete (${elapsed}s, detected via stderr)"
             rm -f "${stderr_file}"
             return 0
+        fi
+
+        # Fallback: if process alive and no stderr errors after fallback_sec, assume ready
+        if [ "${elapsed}" -ge "${fallback_sec}" ]; then
+            local stderr_size
+            stderr_size=$(wc -c < "${stderr_file}" | tr -d ' ')
+            if [ "${stderr_size}" -eq 0 ]; then
+                log_info "Falco startup assumed ready (${elapsed}s, process alive, no stderr errors)"
+                rm -f "${stderr_file}"
+                return 0
+            fi
         fi
 
         sleep 1

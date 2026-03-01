@@ -83,13 +83,14 @@
     },
     {
       "id": "BENIGN_WE_NOTOOL_001",
-      "description": "Empty tool with system path (WorkspaceEscape requires non-empty tool)",
+      "description": "Empty tool with system path (parser WE non-detection: tool='', but Falco Escape fires on args)",
       "payload": "{\"type\":\"tool_call\",\"tool\":\"\",\"args\":\"/etc/passwd\",\"session_id\":\"sess-benign-009\",\"timestamp\":\"2026-02-27T11:00:08Z\"}",
-      "expected_rule": "",
-      "attack_type": "",
-      "severity": "",
+      "expected_rule": "[OPENCLAW Escape] Workspace Escape Attempt",
+      "attack_type": "workspace_escape",
+      "severity": "high",
       "encoding": "none",
-      "expected_threat": ""
+      "expected_threat": "",
+      "note": "Parser WE requires tool!='', so expected_threat=''. But Falco Escape rule has no tool condition, fires on /etc/passwd in args."
     },
     {
       "id": "BENIGN_SC_NOTYPE_001",

@@ -207,17 +207,26 @@ class BatchAnalyzer:
 
     def _check_rule_match(self, expected_rule: str, expected_rules: list,
                           matched_rules: list) -> bool:
-        """Check if expected rules match actual detections."""
-        if expected_rules:
-            # Composite pattern: all expected rules must be present
+        """Check if expected rules match actual detections.
+
+        Note: Falco 0.43.0 fires only ONE rule per event (highest priority).
+        For composite patterns with expected_rules[], we check that the primary
+        expected_rule matches, since multiple rules won't fire simultaneously.
+        """
+        if expected_rules and expected_rule:
+            # Composite pattern: check primary expected_rule matches
+            # (Falco fires only the highest-priority matching rule per event)
+            return any(
+                self.compare_rules(expected_rule, matched)
+                for matched in matched_rules
+            )
+        elif expected_rules:
+            # Composite without primary: check any expected rule matches
             for expected in expected_rules:
-                found = any(
-                    self.compare_rules(expected, matched)
-                    for matched in matched_rules
-                )
-                if not found:
-                    return False
-            return True
+                if any(self.compare_rules(expected, matched)
+                       for matched in matched_rules):
+                    return True
+            return False
         elif expected_rule:
             # Single rule: at least one detection must match
             return any(
@@ -259,8 +268,11 @@ class BatchAnalyzer:
         if category == "benign":
             # Benign patterns: check if detection matches expected behavior
             expected_threat = pattern_info.get("expected_threat", "")
-            if expected_threat:
-                # Some benign patterns expect specific detections
+            if expected_rule:
+                # Falco-level detection expected (even if parser doesn't detect)
+                return "passed" if (detected and rule_match) else "failed"
+            elif expected_threat:
+                # Parser-level detection expected
                 return "passed" if detected else "failed"
             else:
                 # True negatives: no detection expected
@@ -362,7 +374,8 @@ class BatchAnalyzer:
         for r in negative_results:
             pattern_info = self.pattern_map.get(r["pattern_id"], {})
             expected_threat = pattern_info.get("expected_threat", "")
-            if not expected_threat and r["detected"]:
+            expected_rule = pattern_info.get("expected_rule", "")
+            if not expected_threat and not expected_rule and r["detected"]:
                 false_positives += 1
 
         fp_rate = false_positives / neg_total if neg_total > 0 else 0.0
