@@ -85,7 +85,6 @@ E2E_SCRIPTS_DIR := e2e/scripts
 E2E_ALLURE_DIR := e2e/allure
 FALCO_BIN ?= falco
 FALCO_BIN_NATIVE ?= /tmp/falco-build/build/userspace/falco/falco
-FALCO_CONFIG ?= falco-local.yaml
 
 .PHONY: e2e-pattern e2e-pipeline e2e-ci e2e-native e2e-report e2e-serve e2e e2e-all
 
@@ -102,7 +101,6 @@ e2e-pipeline:
 e2e-ci: build
 	mkdir -p $(E2E_RESULTS_DIR)
 	bash $(E2E_SCRIPTS_DIR)/inject_patterns.sh \
-		-c $(FALCO_CONFIG) \
 		-p $(E2E_PATTERNS_DIR) \
 		-o $(E2E_RESULTS_DIR)/falco-output.log \
 		-f $(FALCO_BIN)
@@ -118,7 +116,6 @@ e2e-ci: build
 e2e-native: build
 	mkdir -p $(E2E_RESULTS_DIR)
 	bash $(E2E_SCRIPTS_DIR)/inject_patterns.sh \
-		-c $(FALCO_CONFIG) \
 		-p $(E2E_PATTERNS_DIR) \
 		-o $(E2E_RESULTS_DIR)/falco-output.log \
 		-f $(FALCO_BIN_NATIVE)

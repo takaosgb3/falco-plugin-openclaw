@@ -9,6 +9,7 @@ on:
       - 'rules/**'
       - 'test/**'
       - 'e2e/**'
+      - '.github/workflows/e2e-test.yml'
       - 'Makefile'
       - 'go.mod'
       - 'go.sum'

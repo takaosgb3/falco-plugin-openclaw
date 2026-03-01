@@ -7,7 +7,6 @@
 # Usage: inject_patterns.sh [OPTIONS]
 #
 # Options:
-#   -c, --config <path>       Falco config template path (required for non-dry-run)
 #   -p, --patterns <dir>      Pattern JSON directory (default: test/e2e/patterns/categories)
 #   -o, --output <path>       Falco output capture file (default: e2e/results/falco-output.log)
 #   -l, --log-file <path>     Test log file path (default: /tmp/openclaw-e2e-test.jsonl)
@@ -42,7 +41,6 @@ readonly DEFAULT_WAIT_MS=100
 readonly RESULTS_DIR="${PROJECT_ROOT}/e2e/results"
 
 # ---- Global variables ----
-CONFIG_TEMPLATE=""
 PATTERNS_DIR="${DEFAULT_PATTERNS_DIR}"
 OUTPUT_FILE="${DEFAULT_OUTPUT}"
 LOG_FILE="${DEFAULT_LOG_FILE}"
@@ -93,7 +91,6 @@ usage() {
 Usage: inject_patterns.sh [OPTIONS]
 
 Options:
-  -c, --config <path>       Falco config template path (required for non-dry-run)
   -p, --patterns <dir>      Pattern JSON directory (default: test/e2e/patterns/categories)
   -o, --output <path>       Falco output capture file (default: e2e/results/falco-output.log)
   -l, --log-file <path>     Test log file path (default: /tmp/openclaw-e2e-test.jsonl)
@@ -115,14 +112,6 @@ USAGE
 parse_args() {
     while [ $# -gt 0 ]; do
         case "$1" in
-            -c|--config)
-                if [ $# -lt 2 ]; then
-                    log_error "Option $1 requires an argument"
-                    exit 1
-                fi
-                CONFIG_TEMPLATE="$2"
-                shift 2
-                ;;
             -p|--patterns)
                 if [ $# -lt 2 ]; then
                     log_error "Option $1 requires an argument"
@@ -194,16 +183,6 @@ parse_args() {
 
 # ---- Validation ----
 validate_args() {
-    if [ "${DRY_RUN}" = false ] && [ -z "${CONFIG_TEMPLATE}" ]; then
-        log_error "Config template path is required (use -c or --config). Use --dry-run to skip Falco."
-        exit 1
-    fi
-
-    if [ -n "${CONFIG_TEMPLATE}" ] && [ ! -f "${CONFIG_TEMPLATE}" ]; then
-        log_error "Config template not found: ${CONFIG_TEMPLATE}"
-        exit 1
-    fi
-
     if [ ! -d "${PATTERNS_DIR}" ]; then
         log_error "Patterns directory not found: ${PATTERNS_DIR}"
         exit 1
