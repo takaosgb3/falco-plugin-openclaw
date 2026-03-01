@@ -388,7 +388,9 @@ inject_all_patterns() {
     wait_sec=$(echo "scale=3; ${WAIT_MS} / 1000" | bc)
 
     local total_injected=0
-    local test_ids_json="["
+    local test_ids_tmp
+    test_ids_tmp=$(mktemp)
+    echo '[]' > "${test_ids_tmp}"
 
     log_info "Scanning patterns in: ${PATTERNS_DIR}"
 
@@ -424,11 +426,13 @@ inject_all_patterns() {
             # Inject the pattern
             inject_pattern "${pattern_id}" "${payload}" "${format}" "${category}" "${log_file_path}"
 
-            # Record in test-ids.json
-            if [ "${total_injected}" -gt 0 ]; then
-                test_ids_json="${test_ids_json},"
-            fi
-            test_ids_json="${test_ids_json}{\"test_id\":\"${pattern_id}\",\"pattern_id\":\"${pattern_id}\",\"category\":\"${category}\",\"sent_at\":${sent_at}}"
+            # Record in test-ids.json (using jq for safe JSON construction)
+            jq --arg tid "${pattern_id}" \
+               --arg pid "${pattern_id}" \
+               --arg cat "${category}" \
+               --argjson sat "${sent_at}" \
+               '. += [{"test_id": $tid, "pattern_id": $pid, "category": $cat, "sent_at": $sat}]' \
+               "${test_ids_tmp}" > "${test_ids_tmp}.new" && mv "${test_ids_tmp}.new" "${test_ids_tmp}"
 
             total_injected=$((total_injected + 1))
 
@@ -441,10 +445,9 @@ inject_all_patterns() {
         done
     done
 
-    test_ids_json="${test_ids_json}]"
-
     # Write test-ids.json
-    echo "${test_ids_json}" | jq '.' > "${test_ids_file}"
+    cp "${test_ids_tmp}" "${test_ids_file}"
+    rm -f "${test_ids_tmp}"
     log_info "Wrote test-ids.json: ${test_ids_file} (${total_injected} patterns)"
 
     echo "${total_injected}"

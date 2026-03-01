@@ -84,6 +84,7 @@ E2E_RESULTS_DIR := e2e/results
 E2E_SCRIPTS_DIR := e2e/scripts
 E2E_ALLURE_DIR := e2e/allure
 FALCO_BIN ?= falco
+FALCO_BIN_NATIVE ?= /tmp/falco-build/build/userspace/falco/falco
 FALCO_CONFIG ?= falco-local.yaml
 
 .PHONY: e2e-pattern e2e-pipeline e2e-ci e2e-native e2e-report e2e-serve e2e e2e-all
@@ -120,7 +121,7 @@ e2e-native: build
 		-c falco-local.yaml \
 		-p $(E2E_PATTERNS_DIR) \
 		-o $(E2E_RESULTS_DIR)/falco-output.log \
-		-f /tmp/falco-build/build/userspace/falco/falco
+		-f $(FALCO_BIN_NATIVE)
 	python3 $(E2E_SCRIPTS_DIR)/batch_analyzer.py \
 		--patterns $(E2E_PATTERNS_DIR) \
 		--falco-log $(E2E_RESULTS_DIR)/falco-output.log \
@@ -144,4 +145,5 @@ e2e-serve:
 e2e: e2e-pattern e2e-pipeline
 
 # All levels + Allure report (full E2E suite)
-e2e-all: build e2e e2e-ci e2e-report
+# Note: e2e-ci already depends on build, so no explicit build dependency needed here
+e2e-all: e2e e2e-ci e2e-report

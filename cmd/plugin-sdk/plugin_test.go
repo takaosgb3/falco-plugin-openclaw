@@ -213,7 +213,8 @@ func TestPipelineOpenSeekEnd(t *testing.T) {
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
 
-	// Wait briefly and verify no events from existing content
+	// Wait for fsnotify + readLoop goroutine to process any existing content.
+	// 200ms is sufficient: fsnotify delivers within ~50ms, readLoop processes immediately.
 	time.Sleep(200 * time.Millisecond)
 	select {
 	case evt := <-inst.eventCh:
@@ -679,7 +680,8 @@ func TestPipelineBufferOverflow(t *testing.T) {
 	}
 	f.Close()
 
-	// Wait for processing
+	// Wait for readLoop to attempt sending all 10 events to a buffer of size 2.
+	// 2s allows the goroutine to process all writes and hit channel-full drops.
 	time.Sleep(2 * time.Second)
 
 	// Verify plugin didn't hang — we can still interact
@@ -707,7 +709,8 @@ func TestPipelineDropCount(t *testing.T) {
 	}
 	f.Close()
 
-	// Wait for processing
+	// Wait for readLoop to process all 20 writes with buffer=1.
+	// 2s allows the goroutine to finish; most events will be dropped.
 	time.Sleep(2 * time.Second)
 
 	dropped := atomic.LoadUint64(&inst.droppedEvents)
@@ -872,7 +875,8 @@ func TestPipelineFileDeleted(t *testing.T) {
 	writeToLog(t, logPath, `{"type":"tool_call","tool":"bash","args":"before-delete","session_id":"sess-del-001","timestamp":"2026-02-27T10:00:00Z"}`)
 	waitForEvent(t, inst.eventCh, 5*time.Second)
 
-	// Delete the file
+	// Delete the file and wait for fsnotify REMOVE event to propagate.
+	// 500ms is sufficient for the watcher to detect and handle the deletion.
 	os.Remove(logPath)
 	time.Sleep(500 * time.Millisecond)
 
@@ -890,7 +894,8 @@ func TestPipelineFileRecreated(t *testing.T) {
 	inst := openAndCleanup(t, p)
 	_ = inst
 
-	// Delete and recreate
+	// Delete and recreate: wait 500ms between each step for fsnotify
+	// to detect REMOVE then CREATE events and update internal state.
 	os.Remove(logPath)
 	time.Sleep(500 * time.Millisecond)
 	os.WriteFile(logPath, []byte(""), 0644)

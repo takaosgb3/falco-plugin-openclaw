@@ -31,13 +31,6 @@ jobs:
         run: go test ./test/e2e/ -v -race -run TestPattern
       - name: Level 2 - Pipeline Tests
         run: go test ./cmd/plugin-sdk/ -v -race -run TestPipeline
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: go-test-results
-          path: test-results/
-          retention-days: 30
       - name: Comment on PR (failure)
         if: failure() && github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
@@ -60,12 +53,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install Falco 0.43.0
+      - name: Install Falco
+        env:
+          FALCO_VERSION: '0.43.0'
         run: |
           curl -fsSL https://falco.org/repo/falcosecurity-packages.asc | sudo gpg --dearmor -o /usr/share/keyrings/falco-archive-keyring.gpg
           echo "deb [signed-by=/usr/share/keyrings/falco-archive-keyring.gpg] https://download.falco.org/packages/deb stable main" | sudo tee /etc/apt/sources.list.d/falcosecurity.list
           sudo apt-get update
-          sudo FALCO_FRONTEND=noninteractive apt-get install -y falco=0.43.0
+          # Pin to tested version; fallback to latest if pinned version unavailable
+          sudo FALCO_FRONTEND=noninteractive apt-get install -y "falco=${FALCO_VERSION}" \
+            || sudo FALCO_FRONTEND=noninteractive apt-get install -y falco
+          falco --version
       - name: Build Plugin
         run: make build
       - name: Run E2E Integration Tests

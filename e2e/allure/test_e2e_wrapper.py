@@ -14,6 +14,7 @@ Usage:
 
 import json
 import os
+import re
 from pathlib import Path
 from typing import Any, Optional
 
@@ -175,12 +176,12 @@ def _html_escape(text: str) -> str:
             .replace("&", "&amp;")
             .replace("<", "&lt;")
             .replace(">", "&gt;")
-            .replace('"', "&quot;"))
+            .replace('"', "&quot;")
+            .replace("'", "&#39;"))
 
 
 def _case_insensitive_replace(text: str, old: str, new: str) -> str:
     """Replace all case-insensitive occurrences of old with new in text."""
-    import re
     return re.sub(re.escape(old), new, text, flags=re.IGNORECASE)
 
 
