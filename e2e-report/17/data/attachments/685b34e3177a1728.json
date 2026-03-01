@@ -1,0 +1,11 @@
+{
+  "pattern_id": "ESCAPE_PROC_001",
+  "category": "workspace_escape",
+  "detected": true,
+  "expected_rule": "[OPENCLAW Escape] Workspace Escape Attempt",
+  "matched_rule": "[OPENCLAW Escape] Workspace Escape Attempt",
+  "rule_match": true,
+  "latency_ms": 0,
+  "evidence": "19:03:02.000000000: Warning [OPENCLAW Escape] Workspace escape attempt detected (tool=read args=/proc/self/environ session=ESCAPE_PROC_001 source=openclaw-e2e-test.jsonl)",
+  "status": "passed"
+}

@@ -1,0 +1,11 @@
+{
+  "pattern_id": "CONFIG_ALLOWALL_001",
+  "category": "suspicious_config",
+  "detected": true,
+  "expected_rule": "[OPENCLAW Config] Suspicious Configuration Change",
+  "matched_rule": "[OPENCLAW Config] Suspicious Configuration Change",
+  "rule_match": true,
+  "latency_ms": 0,
+  "evidence": "19:04:00.000000000: Warning [OPENCLAW Config] Suspicious config change detected (args=dm_policy=allow_all config_path=/home/user/.openclaw/openclaw.json session=CONFIG_ALLOWALL_001 source=openclaw-e2e-test.jsonl)",
+  "status": "passed"
+}

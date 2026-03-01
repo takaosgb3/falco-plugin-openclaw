@@ -1,0 +1,11 @@
+{
+  "pattern_id": "MODEL_CUSTOM_001",
+  "category": "unauthorized_model",
+  "detected": true,
+  "expected_rule": "[OPENCLAW Model] Unauthorized Model Change",
+  "matched_rule": "[OPENCLAW Model] Unauthorized Model Change",
+  "rule_match": true,
+  "latency_ms": 0,
+  "evidence": "19:05:01.000000000: Notice [OPENCLAW Model] Unauthorized model change detected (model=custom-unsafe-model config_path=/home/user/.openclaw/openclaw.json session=MODEL_CUSTOM_001 source=openclaw-e2e-test.jsonl)",
+  "status": "passed"
+}
