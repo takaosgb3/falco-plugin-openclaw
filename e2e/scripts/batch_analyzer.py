@@ -311,7 +311,9 @@ class BatchAnalyzer:
         Strategies (in order):
         1. Exact match
         2. Normalized match (lowercase, stripped prefix)
-        3. Partial match (expected contained in actual or vice versa)
+        3. Guarded partial match — the shorter string must be at least 50%
+           of the longer string's length to prevent short fragments like
+           "command" from matching unrelated rules.
         """
         if not expected or not actual:
             return False
@@ -326,9 +328,12 @@ class BatchAnalyzer:
         if norm_expected == norm_actual:
             return True
 
-        # 3. Partial match
-        if norm_expected in norm_actual or norm_actual in norm_expected:
-            return True
+        # 3. Guarded partial match — require minimum overlap ratio
+        shorter = min(len(norm_expected), len(norm_actual))
+        longer = max(len(norm_expected), len(norm_actual))
+        if longer > 0 and shorter / longer >= 0.5:
+            if norm_expected in norm_actual or norm_actual in norm_expected:
+                return True
 
         return False
 

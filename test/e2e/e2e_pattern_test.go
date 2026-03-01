@@ -197,16 +197,15 @@ func TestPatternInputSizeLimit(t *testing.T) {
 	p := parser.New(parser.Config{SecurityPatterns: true})
 	pf := loadPatternFile(t, "edge_cases.json")
 
-	// Test the 3 10KB boundary patterns
-	sizePatterns := map[string]string{
-		"EDGE_10KB_UNDER_001": "dangerous_command", // 10239B: not truncated
-		"EDGE_10KB_EXACT_001": "dangerous_command",  // 10240B: not truncated
-		"EDGE_10KB_OVER_001":  "none",               // 10241B: truncated, non-detection
+	// 10KB boundary pattern IDs to test
+	sizePatternIDs := map[string]bool{
+		"EDGE_10KB_UNDER_001": true,
+		"EDGE_10KB_EXACT_001": true,
+		"EDGE_10KB_OVER_001":  true,
 	}
 
 	for _, pattern := range pf.Patterns {
-		expected, ok := sizePatterns[pattern.ID]
-		if !ok {
+		if !sizePatternIDs[pattern.ID] {
 			continue
 		}
 		t.Run(pattern.ID, func(t *testing.T) {
@@ -214,23 +213,26 @@ func TestPatternInputSizeLimit(t *testing.T) {
 			require.NoError(t, err, "Parse failed for pattern %s", pattern.ID)
 
 			// Verify args byte count
-			if strings.HasPrefix(pattern.ID, "EDGE_10KB") {
-				var payload map[string]interface{}
-				err := json.Unmarshal([]byte(pattern.Payload), &payload)
-				require.NoError(t, err)
-				args, ok := payload["args"].(string)
-				require.True(t, ok, "args field must be a string")
+			var payload map[string]interface{}
+			err = json.Unmarshal([]byte(pattern.Payload), &payload)
+			require.NoError(t, err)
+			args, ok := payload["args"].(string)
+			require.True(t, ok, "args field must be a string")
 
-				switch pattern.ID {
-				case "EDGE_10KB_UNDER_001":
-					assert.Equal(t, 10239, len(args), "UNDER: args must be 10239 bytes")
-				case "EDGE_10KB_EXACT_001":
-					assert.Equal(t, 10240, len(args), "EXACT: args must be 10240 bytes")
-				case "EDGE_10KB_OVER_001":
-					assert.Equal(t, 10241, len(args), "OVER: args must be 10241 bytes")
-				}
+			switch pattern.ID {
+			case "EDGE_10KB_UNDER_001":
+				assert.Equal(t, 10239, len(args), "UNDER: args must be 10239 bytes")
+			case "EDGE_10KB_EXACT_001":
+				assert.Equal(t, 10240, len(args), "EXACT: args must be 10240 bytes")
+			case "EDGE_10KB_OVER_001":
+				assert.Equal(t, 10241, len(args), "OVER: args must be 10241 bytes")
 			}
 
+			// Read expected threat from JSON data (not hardcoded)
+			expected := pattern.ExpectedThreat
+			if expected == "" {
+				expected = "none"
+			}
 			assert.Equal(t, expected, entry.SecurityThreat.String(),
 				"Pattern %s: expected %q, got %q",
 				pattern.ID, expected, entry.SecurityThreat.String())

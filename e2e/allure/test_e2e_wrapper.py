@@ -117,6 +117,10 @@ def load_test_results(path: str) -> list:
 def highlight_keywords_in_text(text: str, keywords: list, fmt: str = "html") -> str:
     """Highlight security keywords in evidence text.
 
+    Applies keyword highlighting to the plain text content first, then wraps
+    in HTML tags. This prevents keyword replacements from corrupting HTML
+    markup. Matched text preserves its original casing.
+
     Args:
         text: The evidence text to highlight
         keywords: List of keywords to highlight
@@ -126,20 +130,23 @@ def highlight_keywords_in_text(text: str, keywords: list, fmt: str = "html") -> 
         Formatted text with highlighted keywords
     """
     if fmt == "html":
-        result = f"<pre style='font-family: monospace; white-space: pre-wrap;'>{_html_escape(text)}</pre>"
+        # Step 1: HTML-escape the text content
+        escaped_text = _html_escape(text)
+        # Step 2: Apply keyword highlighting to escaped text only (not HTML tags)
         for kw in keywords:
             escaped_kw = _html_escape(kw)
-            if escaped_kw.lower() in result.lower():
-                result = _case_insensitive_replace(
-                    result, escaped_kw,
-                    f"<mark style='background: #ffeb3b; font-weight: bold;'>{escaped_kw}</mark>"
+            if escaped_kw.lower() in escaped_text.lower():
+                escaped_text = _case_insensitive_replace(
+                    escaped_text, escaped_kw,
+                    lambda m: f"<mark style='background: #ffeb3b; font-weight: bold;'>{m}</mark>"
                 )
-        return result
+        # Step 3: Wrap in HTML tags after highlighting
+        return f"<pre style='font-family: monospace; white-space: pre-wrap;'>{escaped_text}</pre>"
     else:
         result = text
         for kw in keywords:
             if kw.lower() in result.lower():
-                result = _case_insensitive_replace(result, kw, f"**{kw}**")
+                result = _case_insensitive_replace(result, kw, lambda m: f"**{m}**")
         return result
 
 
@@ -180,8 +187,22 @@ def _html_escape(text: str) -> str:
             .replace("'", "&#39;"))
 
 
-def _case_insensitive_replace(text: str, old: str, new: str) -> str:
-    """Replace all case-insensitive occurrences of old with new in text."""
+def _case_insensitive_replace(text: str, old: str, new) -> str:
+    """Replace all case-insensitive occurrences of old in text.
+
+    Args:
+        text: The text to search in
+        old: The pattern to match (case-insensitive)
+        new: Either a replacement string, or a callable that receives the
+             matched text and returns the replacement (preserves original case)
+    """
+    if callable(new):
+        return re.sub(
+            re.escape(old),
+            lambda m: new(m.group(0)),
+            text,
+            flags=re.IGNORECASE,
+        )
     return re.sub(re.escape(old), new, text, flags=re.IGNORECASE)
 
 

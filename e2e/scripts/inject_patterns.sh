@@ -307,12 +307,12 @@ start_falco() {
             return 0
         fi
 
-        # Fallback: if process alive and no stderr errors after fallback_sec, assume ready
+        # Fallback: if process alive and no fatal errors in stderr after fallback_sec, assume ready.
+        # This handles macOS MINIMAL_BUILD (no stderr) and Falco versions that emit
+        # non-fatal warnings/info to stderr without the "Enabled event sources:" marker.
         if [ "${elapsed}" -ge "${fallback_sec}" ]; then
-            local stderr_size
-            stderr_size=$(wc -c < "${stderr_file}" | tr -d ' ')
-            if [ "${stderr_size}" -eq 0 ]; then
-                log_info "Falco startup assumed ready (${elapsed}s, process alive, no stderr errors)"
+            if ! grep -qiE "(error|fatal|failed to load|cannot open)" "${stderr_file}" 2>/dev/null; then
+                log_info "Falco startup assumed ready (${elapsed}s, process alive, no fatal errors in stderr)"
                 rm -f "${stderr_file}"
                 return 0
             fi
