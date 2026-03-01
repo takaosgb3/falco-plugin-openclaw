@@ -1,0 +1,3 @@
+Expected Rule: [OPENCLAW DataExfil] Data Exfiltration Attempt
+Matched Rule: [OPENCLAW DataExfil] Data Exfiltration Attempt
+Rule Match: ✅ Match

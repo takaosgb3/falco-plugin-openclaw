@@ -1,0 +1,11 @@
+{
+  "pattern_id": "PLAIN_KV_ESCAPE_001",
+  "category": "plaintext_threats",
+  "detected": true,
+  "expected_rule": "[OPENCLAW Escape] Workspace Escape Attempt",
+  "matched_rule": "[OPENCLAW Escape] Workspace Escape Attempt",
+  "rule_match": true,
+  "latency_ms": 0,
+  "evidence": "10:00:01.000000000: Warning [OPENCLAW Escape] Workspace escape attempt detected (tool=read args=session=PLAIN_KV_ESCAPE_001 tool=read args=/etc/shadow session=PLAIN_KV_ESCAPE_001 source=openclaw-e2e-test.jsonl)",
+  "status": "passed"
+}

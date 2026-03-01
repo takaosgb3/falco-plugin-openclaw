@@ -1,0 +1,11 @@
+{
+  "pattern_id": "MODEL_CHANGE_001",
+  "category": "unauthorized_model",
+  "detected": true,
+  "expected_rule": "[OPENCLAW Model] Unauthorized Model Change",
+  "matched_rule": "[OPENCLAW Model] Unauthorized Model Change",
+  "rule_match": true,
+  "latency_ms": 0,
+  "evidence": "10:05:00.000000000: Notice [OPENCLAW Model] Unauthorized model change detected (model=gpt-4-turbo config_path=/home/user/.openclaw/openclaw.json session=MODEL_CHANGE_001 source=openclaw-e2e-test.jsonl)",
+  "status": "passed"
+}

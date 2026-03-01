@@ -1,1 +1,1 @@
-[{"name":"Local Deploy","type":"local","buildOrder":18,"buildName":"E2E Tests #18 (local)","reportUrl":"https://takaosgb3.github.io/falco-plugin-openclaw/e2e-report/18/"}]
+[{"name":"GitHub Actions","type":"github","buildOrder":18,"buildName":"E2E Tests #18","buildUrl":"https://github.com/takaosgb3/falco-plugin-openclaw/actions/runs/22539266027","reportUrl":"https://takaosgb3.github.io/falco-plugin-openclaw/e2e-report/18/"}]
