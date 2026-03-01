@@ -15,7 +15,7 @@ Usage:
 import json
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import allure
 import pytest
@@ -71,7 +71,7 @@ SEVERITY_MAP = {
 }
 
 # Cache for loaded patterns
-_patterns_cache: dict | None = None
+_patterns_cache: Optional[dict] = None
 
 
 def load_all_patterns() -> dict:
