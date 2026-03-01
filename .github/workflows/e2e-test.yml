@@ -91,7 +91,7 @@ jobs:
           python-version: '3.12'
       - name: Install Allure CLI
         run: |
-          curl -o allure-2.32.0.tgz -OLs https://github.com/allure-framework/allure2/releases/download/2.32.0/allure-2.32.0.tgz
+          curl -o allure-2.32.0.tgz -Ls https://github.com/allure-framework/allure2/releases/download/2.32.0/allure-2.32.0.tgz
           tar -xzf allure-2.32.0.tgz
           echo "$PWD/allure-2.32.0/bin" >> $GITHUB_PATH
       - uses: actions/setup-java@v4

@@ -415,7 +415,7 @@ func TestPatternFixtures(t *testing.T) {
 	}
 }
 
-// --- Additional Edge Case Tests ---
+// --- Additional Edge Case Tests (catch-all for patterns not covered by specific tests) ---
 
 func TestPatternEdgeCases(t *testing.T) {
 	edgePath := filepath.Join(patternsDir(), "edge_cases.json")
@@ -426,7 +426,22 @@ func TestPatternEdgeCases(t *testing.T) {
 	p := parser.New(parser.Config{SecurityPatterns: true})
 	pf := loadPatternFile(t, "edge_cases.json")
 
+	// Skip patterns already covered by dedicated tests with additional assertions:
+	// - TC-3-04 (TestPatternInputSizeLimit): verifies byte counts
+	// - TC-3-07 (TestPatternEmptyTool): verifies empty/whitespace handling
+	coveredByDedicatedTests := map[string]bool{
+		"EDGE_10KB_UNDER_001": true,
+		"EDGE_10KB_EXACT_001": true,
+		"EDGE_10KB_OVER_001":  true,
+		"EDGE_EMPTY_ARGS_001": true,
+		"EDGE_EMPTY_TOOL_001": true,
+		"EDGE_WHITESPACE_001": true,
+	}
+
 	for _, pattern := range pf.Patterns {
+		if coveredByDedicatedTests[pattern.ID] {
+			continue
+		}
 		t.Run(pattern.ID, func(t *testing.T) {
 			entry, err := p.Parse(pattern.Payload)
 			require.NoError(t, err, "Parse failed for pattern %s", pattern.ID)

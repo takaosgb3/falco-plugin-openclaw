@@ -460,7 +460,6 @@ def main():
     )
     args = parser.parse_args()
 
-    is_ci = os.environ.get("GITHUB_ACTIONS") == "true"
     min_detection_rate = float(
         os.environ.get("MIN_DETECTION_RATE", str(DEFAULT_MIN_DETECTION_RATE))
     )
@@ -506,8 +505,7 @@ def main():
     total_passed = sum(1 for r in results if r["status"] == "passed")
     total_failed = sum(1 for r in results if r["status"] == "failed")
 
-    prefix = "" if is_ci else ""
-    print(f"\n{prefix}=== OpenClaw E2E Test Results ===")
+    print("\n=== OpenClaw E2E Test Results ===")
     print(f"  Total patterns: {len(results)} (passed: {total_passed}, failed: {total_failed})")
     print(f"  Detection rate: {pos['detection_rate']:.1%} ({pos['detected']}/{pos['total']})")
     print(f"  False positive rate: {neg['fp_rate']:.1%} ({neg['false_positives']}/{neg['total']})")
@@ -535,7 +533,7 @@ def main():
                       f"expected={r['expected_rule']}, "
                       f"matched={r['matched_rule']}")
 
-    print(f"\n{prefix}Analysis complete.")
+    print("\nAnalysis complete.")
 
 
 if __name__ == "__main__":

@@ -197,6 +197,26 @@ validate_args() {
         log_error "jq is required but not found"
         exit 1
     fi
+
+    if ! command -v bc >/dev/null 2>&1; then
+        log_error "bc is required but not found"
+        exit 1
+    fi
+
+    if ! command -v python3 >/dev/null 2>&1; then
+        log_error "python3 is required but not found"
+        exit 1
+    fi
+
+    # Validate numeric arguments
+    if ! [[ "${TIMEOUT_SEC}" =~ ^[0-9]+$ ]]; then
+        log_error "Invalid timeout value (must be integer): ${TIMEOUT_SEC}"
+        exit 1
+    fi
+    if ! [[ "${WAIT_MS}" =~ ^[0-9]+$ ]]; then
+        log_error "Invalid wait value (must be integer): ${WAIT_MS}"
+        exit 1
+    fi
 }
 
 # ---- Millisecond timestamp (cross-platform) ----
