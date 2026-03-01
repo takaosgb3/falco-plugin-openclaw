@@ -151,24 +151,18 @@ def highlight_keywords_in_text(text: str, keywords: list, fmt: str = "html") -> 
 
 
 def format_rule_match_status(result: dict) -> str:
-    """Format expected vs matched rule comparison for Allure attachment."""
+    """Format rule match status as emoji string."""
+    category = result.get("category", "")
     expected = result.get("expected_rule", "")
-    matched = result.get("matched_rule", "")
-    rule_match = result.get("rule_match", False)
-    matched_rules = result.get("matched_rules", [])
+    rule_match = result.get("rule_match") is True
 
-    lines = []
-    lines.append(f"Expected Rule: {expected or '(none)'}")
-
-    if matched_rules:
-        lines.append(f"Matched Rules: {', '.join(matched_rules)}")
-    else:
-        lines.append(f"Matched Rule:  {matched or '(none)'}")
-
-    status_icon = "MATCH" if rule_match else "MISMATCH"
-    lines.append(f"Status: {status_icon}")
-
-    return "\n".join(lines)
+    if category == "benign" and not expected:
+        return "✅ Expected Not Detected"
+    if not expected:
+        return "⚠️ Not Defined"
+    if rule_match:
+        return "✅ Match"
+    return "❌ Mismatch"
 
 
 def map_severity(result: dict) -> Any:
@@ -217,6 +211,87 @@ def pytest_generate_tests(metafunc):
             metafunc.parametrize("result", results, ids=lambda r: r["pattern_id"])
 
 
+def _format_latency(result: dict) -> str:
+    """Format latency for display."""
+    latency = result.get("latency_ms", -1)
+    if latency < 0:
+        return "N/A"
+    return f"{latency}ms"
+
+
+def _build_description(result: dict, pattern_info: dict) -> str:
+    """Build rich Markdown description for Allure report detail view."""
+    pattern_id = result["pattern_id"]
+    category = result["category"]
+    status = result.get("status", "unknown")
+    expected_rule = result.get("expected_rule", "")
+    matched_rule = result.get("matched_rule", "")
+    matched_rules = result.get("matched_rules", [])
+    evidence = result.get("evidence", "No evidence recorded")
+
+    # Pattern info fields
+    desc_text = pattern_info.get("description", "N/A")
+    severity = pattern_info.get("severity", "N/A")
+    attack_type = pattern_info.get("attack_type", category)
+    payload_raw = pattern_info.get("payload", "")
+
+    # Try to extract args from JSON payload
+    payload_display = payload_raw
+    try:
+        p = json.loads(payload_raw)
+        if isinstance(p, dict) and "args" in p:
+            payload_display = p["args"]
+    except (json.JSONDecodeError, TypeError):
+        pass
+
+    # Rule mapping display
+    if matched_rules:
+        matched_display = ", ".join(f"`{r}`" for r in matched_rules)
+    else:
+        matched_display = f"`{matched_rule or 'N/A'}`"
+
+    match_status = format_rule_match_status(result)
+    detected = result.get("detected", False)
+    detection_count = "1 / 1" if detected else "0 / 1"
+
+    description = f"""
+## Attack Pattern Information
+
+| Item | Value |
+|------|-------|
+| **Pattern ID** | `{pattern_id}` |
+| **Description** | {desc_text} |
+| **Category** | {attack_type.upper()} |
+| **Severity** | `{severity.upper() if severity else 'N/A'}` |
+
+## Attack Details
+
+- **Payload**: `{payload_display or 'N/A'}`
+- **Expected Detection**: {'Yes' if expected_rule else 'No'}
+
+## Test Execution Results
+
+- **Status**: `{status.upper()}`
+- **Detection Count**: {detection_count}
+- **Latency**: {_format_latency(result)}
+
+## Rule Mapping
+
+| Item | Value |
+|------|-------|
+| **Expected Rule** | `{expected_rule or 'N/A'}` |
+| **Matched Rule** | {matched_display} |
+| **Rule Match** | {match_status} |
+
+## Detection Evidence
+
+```
+{evidence}
+```
+"""
+    return description.strip()
+
+
 def test_e2e_detection(result):
     """E2E pattern detection test — one test case per pattern."""
     pattern_id = result["pattern_id"]
@@ -228,54 +303,75 @@ def test_e2e_detection(result):
     allure.dynamic.story(pattern_id)
     allure.dynamic.severity(map_severity(result))
 
-    # Add description from pattern data
+    # Load pattern info and build rich description
     patterns = load_all_patterns()
     pattern_info = patterns.get(pattern_id, {})
-    description = pattern_info.get("description", "")
-    if description:
-        allure.dynamic.description(description)
+    description = _build_description(result, pattern_info)
+    allure.dynamic.description(description)
 
-    # Attach evidence with keyword highlighting
+    # Step 1: Test execution result (JSON attachment)
+    with allure.step("Test Execution Result"):
+        allure.attach(
+            json.dumps(result, indent=2),
+            name=f"{pattern_id}-result.json",
+            attachment_type=allure.attachment_type.JSON,
+        )
+
+    # Step 2: Detection evidence with keyword highlighting
     evidence = result.get("evidence", "")
     if evidence:
         highlighted = highlight_keywords_in_text(evidence, SECURITY_KEYWORDS, "html")
-        allure.attach(
-            highlighted,
-            name="Falco Alert Evidence",
-            attachment_type=allure.attachment_type.HTML,
+        html_doc = (
+            "<!DOCTYPE html><html><head><meta charset='UTF-8'>"
+            "<style>body{font-family:monospace;padding:15px;background:#1a1a1a;"
+            "color:#e0e0e0;line-height:1.5}pre{white-space:pre-wrap;word-wrap:break-word}"
+            "mark{background:#FFFF00;color:#000;padding:1px 3px;border-radius:2px}</style>"
+            f"</head><body><h3 style='color:#4CAF50'>Detection Evidence</h3>{highlighted}</body></html>"
         )
+        with allure.step("Detection Evidence (Highlighted)"):
+            allure.attach(
+                html_doc,
+                name="Detection Evidence (HTML)",
+                attachment_type=allure.attachment_type.HTML,
+            )
 
-    # Attach rule mapping status
-    expected_rule = result.get("expected_rule", "")
-    if expected_rule:
-        rule_status = format_rule_match_status(result)
+    # Step 3: Rule mapping verification
+    with allure.step("Rule Mapping Verification"):
+        expected_rule = result.get("expected_rule", "")
+        matched_rule = result.get("matched_rule", "")
+        match_status = format_rule_match_status(result)
+        mapping_text = (
+            f"Expected Rule: {expected_rule or 'N/A'}\n"
+            f"Matched Rule: {matched_rule or 'N/A'}\n"
+            f"Rule Match: {match_status}"
+        )
         allure.attach(
-            rule_status,
+            mapping_text,
             name="Rule Mapping",
             attachment_type=allure.attachment_type.TEXT,
         )
 
-    # Attach latency info
-    latency = result.get("latency_ms", -1)
-    if latency >= 0:
-        allure.attach(
-            f"Detection latency: {latency}ms",
-            name="Latency",
-            attachment_type=allure.attachment_type.TEXT,
-        )
+    # Step 4: Verification result
+    with allure.step("Verification Result"):
+        if result["status"] == "passed":
+            allure.attach(
+                f"Test passed: {pattern_id}",
+                name="Test Result",
+                attachment_type=allure.attachment_type.TEXT,
+            )
+        else:
+            allure.attach(
+                f"Test failed: {pattern_id}\nDetected: {result.get('detected')}\n"
+                f"Expected: {expected_rule}\nMatched: {matched_rule}",
+                name="Test Result",
+                attachment_type=allure.attachment_type.TEXT,
+            )
 
-    # Attach raw result JSON for debugging
-    allure.attach(
-        json.dumps(result, indent=2),
-        name="Raw Result",
-        attachment_type=allure.attachment_type.JSON,
-    )
-
-    # Assert test status
+    # pytest assertion
     assert result["status"] == "passed", (
         f"Pattern {pattern_id} ({category}): "
         f"status={result['status']}, "
         f"detected={result.get('detected')}, "
-        f"expected_rule={expected_rule}, "
+        f"expected_rule={result.get('expected_rule', '')}, "
         f"matched_rule={result.get('matched_rule', '')}"
     )
