@@ -3,8 +3,8 @@
   "patterns": [
     {
       "id": "SHELLINJ_SUBSHELL_001",
-      "description": "Subshell injection in read tool",
-      "payload": "{\"type\":\"tool_call\",\"tool\":\"read\",\"args\":\"$(cat /etc/passwd)\",\"session_id\":\"sess-060\",\"timestamp\":\"2026-02-27T10:06:00Z\"}",
+      "description": "Subshell injection in read tool (whoami, no WE path)",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"read\",\"args\":\"$(whoami)\",\"session_id\":\"sess-060\",\"timestamp\":\"2026-02-27T10:06:00Z\"}",
       "expected_rule": "[OPENCLAW ShellInj] Shell Injection Attempt",
       "attack_type": "shell_injection",
       "severity": "high",
@@ -30,8 +30,8 @@
     },
     {
       "id": "SHELLINJ_PIPE_001",
-      "description": "Pipe injection in grep tool",
-      "payload": "{\"type\":\"tool_call\",\"tool\":\"grep\",\"args\":\"pattern | cat /etc/passwd\",\"session_id\":\"sess-063\",\"timestamp\":\"2026-02-27T10:06:03Z\"}",
+      "description": "Pipe injection in grep tool (whoami, no WE path)",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"grep\",\"args\":\"pattern | whoami\",\"session_id\":\"sess-063\",\"timestamp\":\"2026-02-27T10:06:03Z\"}",
       "expected_rule": "[OPENCLAW ShellInj] Shell Injection Attempt",
       "attack_type": "shell_injection",
       "severity": "high",

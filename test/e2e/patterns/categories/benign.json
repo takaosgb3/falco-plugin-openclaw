@@ -1,0 +1,106 @@
+{
+  "category": "benign",
+  "patterns": [
+    {
+      "id": "BENIGN_LS_001",
+      "description": "Normal file listing operation",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"bash\",\"args\":\"ls -la\",\"session_id\":\"sess-benign-001\",\"timestamp\":\"2026-02-27T11:00:00Z\"}",
+      "expected_rule": "",
+      "attack_type": "",
+      "severity": "",
+      "encoding": "none",
+      "expected_threat": ""
+    },
+    {
+      "id": "BENIGN_GIT_001",
+      "description": "Git operations with && (ShellInj non-target: tool=bash)",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"bash\",\"args\":\"git status && git diff\",\"session_id\":\"sess-benign-002\",\"timestamp\":\"2026-02-27T11:00:01Z\"}",
+      "expected_rule": "",
+      "attack_type": "",
+      "severity": "",
+      "encoding": "none",
+      "expected_threat": ""
+    },
+    {
+      "id": "BENIGN_READ_001",
+      "description": "Normal file read operation",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"read\",\"args\":\"./src/main.go\",\"session_id\":\"sess-benign-003\",\"timestamp\":\"2026-02-27T11:00:02Z\"}",
+      "expected_rule": "",
+      "attack_type": "",
+      "severity": "",
+      "encoding": "none",
+      "expected_threat": ""
+    },
+    {
+      "id": "BENIGN_WRITE_001",
+      "description": "Normal file write operation",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"write\",\"args\":\"./output.txt\",\"session_id\":\"sess-benign-004\",\"timestamp\":\"2026-02-27T11:00:03Z\"}",
+      "expected_rule": "",
+      "attack_type": "",
+      "severity": "",
+      "encoding": "none",
+      "expected_threat": ""
+    },
+    {
+      "id": "BENIGN_MSG_001",
+      "description": "User message event (non-tool_call)",
+      "payload": "{\"type\":\"message\",\"user_message\":\"show me the files\",\"session_id\":\"sess-benign-005\",\"timestamp\":\"2026-02-27T11:00:04Z\"}",
+      "expected_rule": "",
+      "attack_type": "",
+      "severity": "",
+      "encoding": "none",
+      "expected_threat": ""
+    },
+    {
+      "id": "BENIGN_SI_BASH_001",
+      "description": "Bash tool with shell metacharacters (ShellInj excludes bash)",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"bash\",\"args\":\"echo $(date)\",\"session_id\":\"sess-benign-006\",\"timestamp\":\"2026-02-27T11:00:05Z\"}",
+      "expected_rule": "",
+      "attack_type": "",
+      "severity": "",
+      "encoding": "none",
+      "expected_threat": ""
+    },
+    {
+      "id": "BENIGN_DC_NONTOOL_001",
+      "description": "Non-bash tool with dangerous command (DangerousCmd requires bash/shell/exec/terminal)",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"read\",\"args\":\"rm -rf /\",\"session_id\":\"sess-benign-007\",\"timestamp\":\"2026-02-27T11:00:06Z\"}",
+      "expected_rule": "",
+      "attack_type": "",
+      "severity": "",
+      "encoding": "none",
+      "expected_threat": ""
+    },
+    {
+      "id": "BENIGN_DE_NOTRANSFER_001",
+      "description": "Sensitive path without transfer tool (DataExfil requires transfer tool)",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"bash\",\"args\":\"cat /etc/passwd\",\"session_id\":\"sess-benign-008\",\"timestamp\":\"2026-02-27T11:00:07Z\"}",
+      "expected_rule": "[OPENCLAW Escape] Workspace Escape Attempt",
+      "attack_type": "workspace_escape",
+      "severity": "high",
+      "encoding": "none",
+      "expected_threat": "workspace_escape"
+    },
+    {
+      "id": "BENIGN_WE_NOTOOL_001",
+      "description": "Empty tool with system path (parser WE non-detection: tool='', but Falco Escape fires on args)",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"\",\"args\":\"/etc/passwd\",\"session_id\":\"sess-benign-009\",\"timestamp\":\"2026-02-27T11:00:08Z\"}",
+      "expected_rule": "[OPENCLAW Escape] Workspace Escape Attempt",
+      "attack_type": "workspace_escape",
+      "severity": "high",
+      "encoding": "none",
+      "expected_threat": "",
+      "note": "Parser WE requires tool!='', so expected_threat=''. But Falco Escape rule has no tool condition, fires on /etc/passwd in args."
+    },
+    {
+      "id": "BENIGN_SC_NOTYPE_001",
+      "description": "Non-config_change event with suspicious keyword (SuspiciousConfig requires config_change type)",
+      "payload": "{\"type\":\"tool_call\",\"tool\":\"write\",\"args\":\"disable_auth\",\"session_id\":\"sess-benign-010\",\"timestamp\":\"2026-02-27T11:00:09Z\"}",
+      "expected_rule": "",
+      "attack_type": "",
+      "severity": "",
+      "encoding": "none",
+      "expected_threat": ""
+    }
+  ]
+}

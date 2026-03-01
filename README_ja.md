@@ -120,6 +120,26 @@ make verify         # バイナリ検証
 
 詳細は [BUILD.md](BUILD.md) を参照してください。
 
+## E2E テスト
+
+プラグインには3つのレベルで構成される包括的なE2Eテストスイートが含まれています：
+
+| レベル | 説明 | Falco必要 | コマンド |
+|--------|------|-----------|---------|
+| レベル1 | パターンカバレッジテスト (Go) | 不要 | `make e2e-pattern` |
+| レベル2 | プラグインパイプラインテスト (Go) | 不要 | `make e2e-pipeline` |
+| レベル3 | Falco統合テスト | 必要 | `make e2e-native` |
+
+```bash
+# レベル1 + レベル2を実行（Falco不要）
+make e2e
+
+# 全レベル + Allureレポート（Falco必要）
+make e2e-all
+```
+
+56のテストパターンが11カテゴリ（エッジケース、複合脅威、良性パターンを含む）をカバーします。詳細は [e2e/README.md](e2e/README.md) を参照してください。
+
 ## Docker
 
 ```bash
@@ -132,6 +152,7 @@ docker run --rm -v ~/.openclaw/logs:/openclaw-logs/logs:ro falco-openclaw
 - [インストールガイド](docs/installation.md)
 - [設定ガイド](docs/configuration.md)
 - [ビルド手順](BUILD.md)
+- [E2Eテストガイド](e2e/README.md)
 - [変更履歴](CHANGELOG.md)
 
 ## デバッグモード

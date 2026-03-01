@@ -234,11 +234,7 @@ func (d *SimpleSecurityDetector) DetectWorkspaceEscape(tool, args string) bool {
 	}
 
 	// Path traversal attempts
-	if strings.Contains(lower, "../../") {
-		return true
-	}
-
-	return false
+	return strings.Contains(lower, "../../")
 }
 
 // DetectSuspiciousConfig checks for suspicious configuration changes.

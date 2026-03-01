@@ -1,0 +1,137 @@
+name: E2E Tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cmd/**'
+      - 'pkg/**'
+      - 'rules/**'
+      - 'test/**'
+      - 'e2e/**'
+      - '.github/workflows/e2e-test.yml'
+      - 'Makefile'
+      - 'go.mod'
+      - 'go.sum'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  go-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Level 1 - Pattern Tests
+        run: go test ./test/e2e/ -v -race -run TestPattern
+      - name: Level 2 - Pipeline Tests
+        run: go test ./cmd/plugin-sdk/ -v -race -run TestPipeline
+      - name: Comment on PR (failure)
+        if: failure() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: e2e-test-results
+          message: |
+            ## E2E Test Results - FAILED
+            Level 1/2 Go tests failed. See [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
+
+  falco-integration:
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'workflow_dispatch'
+    needs: [go-tests]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Falco
+        env:
+          FALCO_VERSION: '0.43.0'
+        run: |
+          curl -fsSL https://falco.org/repo/falcosecurity-packages.asc | sudo gpg --dearmor -o /usr/share/keyrings/falco-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/falco-archive-keyring.gpg] https://download.falco.org/packages/deb stable main" | sudo tee /etc/apt/sources.list.d/falcosecurity.list
+          sudo apt-get update
+          # Pin to tested version; fallback to latest if pinned version unavailable
+          sudo FALCO_FRONTEND=noninteractive apt-get install -y "falco=${FALCO_VERSION}" \
+            || sudo FALCO_FRONTEND=noninteractive apt-get install -y falco
+          falco --version
+      - name: Build Plugin
+        run: make build
+      - name: Run E2E Integration Tests
+        run: make e2e-ci
+      - name: Validate Falco rules
+        run: |
+          sudo falco --validate rules/openclaw_rules.yaml -c falco.yaml 2>&1 || true
+      - name: Upload E2E results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: e2e/results/
+          retention-days: 30
+
+  allure-report:
+    runs-on: ubuntu-24.04
+    needs: [falco-integration]
+    if: always() && needs.falco-integration.result != 'skipped'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Allure CLI
+        run: |
+          curl -o allure-2.32.0.tgz -Ls https://github.com/allure-framework/allure2/releases/download/2.32.0/allure-2.32.0.tgz
+          tar -xzf allure-2.32.0.tgz
+          echo "$PWD/allure-2.32.0/bin" >> $GITHUB_PATH
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Download E2E results
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: e2e-results
+          path: e2e/results/
+      - name: Install Python dependencies
+        run: pip install -r e2e/allure/requirements.txt
+      - name: Generate Allure results
+        run: make e2e-report
+      - name: Generate Allure HTML report
+        run: allure generate allure-results -o allure-report --clean
+      - name: Upload Allure report
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report/
+          retention-days: 30
+
+  # Deploy only runs when workflow_dispatch is triggered on main branch.
+  # PR events run on the PR branch (not main), so this job is skipped for PRs.
+  deploy-pages:
+    runs-on: ubuntu-24.04
+    needs: [allure-report]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Download Allure report
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report/
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./allure-report
+          destination_dir: ${{ github.run_number }}

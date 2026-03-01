@@ -76,3 +76,71 @@ install: verify
 	sudo cp $(BINARY) /usr/share/falco/plugins/lib$(PLUGIN_NAME)-plugin.so
 	sudo cp rules/$(PLUGIN_NAME)_rules.yaml /etc/falco/rules.d/
 	@echo "Plugin installed"
+
+# --- E2E Test Targets ---
+
+E2E_PATTERNS_DIR := test/e2e/patterns/categories
+E2E_RESULTS_DIR := e2e/results
+E2E_SCRIPTS_DIR := e2e/scripts
+E2E_ALLURE_DIR := e2e/allure
+FALCO_BIN ?= falco
+FALCO_BIN_NATIVE ?= /tmp/falco-build/build/userspace/falco/falco
+
+.PHONY: e2e-pattern e2e-pipeline e2e-ci e2e-native e2e-report e2e-serve e2e e2e-all
+
+# Level 1: Pattern coverage tests (Go test, no Falco needed)
+e2e-pattern:
+	go test ./test/e2e/ -v -race -run TestPattern -count=1
+
+# Level 2: Plugin pipeline tests (Go test, no Falco needed)
+e2e-pipeline:
+	go test ./cmd/plugin-sdk/ -v -race -run TestPipeline -count=1 -timeout 120s
+
+# Level 3: Falco integration tests (Linux CI/CD)
+# Requires: Falco installed, plugin .so built
+e2e-ci: build
+	mkdir -p $(E2E_RESULTS_DIR)
+	bash $(E2E_SCRIPTS_DIR)/inject_patterns.sh \
+		-p $(E2E_PATTERNS_DIR) \
+		-o $(E2E_RESULTS_DIR)/falco-output.log \
+		-f $(FALCO_BIN)
+	python3 $(E2E_SCRIPTS_DIR)/batch_analyzer.py \
+		--patterns $(E2E_PATTERNS_DIR) \
+		--falco-log $(E2E_RESULTS_DIR)/falco-output.log \
+		--test-ids $(E2E_RESULTS_DIR)/test-ids.json \
+		--output $(E2E_RESULTS_DIR)/test-results.json \
+		--summary-output $(E2E_RESULTS_DIR)/summary.json
+
+# Level 3: Falco integration tests (macOS native)
+# Requires: Falco 0.43.0 MINIMAL_BUILD, plugin .dylib built
+e2e-native: build
+	mkdir -p $(E2E_RESULTS_DIR)
+	bash $(E2E_SCRIPTS_DIR)/inject_patterns.sh \
+		-p $(E2E_PATTERNS_DIR) \
+		-o $(E2E_RESULTS_DIR)/falco-output.log \
+		-f $(FALCO_BIN_NATIVE)
+	python3 $(E2E_SCRIPTS_DIR)/batch_analyzer.py \
+		--patterns $(E2E_PATTERNS_DIR) \
+		--falco-log $(E2E_RESULTS_DIR)/falco-output.log \
+		--test-ids $(E2E_RESULTS_DIR)/test-ids.json \
+		--output $(E2E_RESULTS_DIR)/test-results.json \
+		--summary-output $(E2E_RESULTS_DIR)/summary.json
+
+# Generate Allure report data from test-results.json
+e2e-report:
+	cd $(E2E_ALLURE_DIR) && python3 -m pytest test_e2e_wrapper.py \
+		--test-results=../../$(E2E_RESULTS_DIR)/test-results.json \
+		--logs-dir=../../$(E2E_RESULTS_DIR) \
+		--alluredir=../../allure-results \
+		-v
+
+# Open Allure report in browser (local development)
+e2e-serve:
+	allure serve allure-results
+
+# Level 1 + Level 2 combined (CI fast path, no Falco needed)
+e2e: e2e-pattern e2e-pipeline
+
+# All levels + Allure report (full E2E suite)
+# Note: e2e-ci already depends on build, so no explicit build dependency needed here
+e2e-all: e2e e2e-ci e2e-report

@@ -1,0 +1,69 @@
+{
+  "category": "plaintext_threats",
+  "patterns": [
+    {
+      "id": "PLAIN_KV_DANGER_001",
+      "description": "key=value format with dangerous command (tool=bash, rm -rf /)",
+      "payload": "2026-02-27T10:00:00Z [WARN] session=sess-p01 tool=bash args=rm -rf /",
+      "expected_rule": "[OPENCLAW DangerousCmd] Dangerous Command Execution",
+      "attack_type": "dangerous_command",
+      "severity": "critical",
+      "encoding": "none",
+      "format": "plaintext",
+      "expected_threat": "dangerous_command",
+      "note": "parsePlaintext extracts tool=bash from key=value, args=rest contains rm -rf /"
+    },
+    {
+      "id": "PLAIN_KV_ESCAPE_001",
+      "description": "key=value format with workspace escape (tool=read, /etc/shadow)",
+      "payload": "2026-02-27T10:00:01Z [WARN] session=sess-p02 tool=read args=/etc/shadow",
+      "expected_rule": "[OPENCLAW Escape] Workspace Escape Attempt",
+      "attack_type": "workspace_escape",
+      "severity": "high",
+      "encoding": "none",
+      "format": "plaintext",
+      "expected_threat": "workspace_escape",
+      "note": "parsePlaintext extracts tool=read, args=rest contains /etc/shadow"
+    },
+    {
+      "id": "PLAIN_FREETEXT_DANGER_001",
+      "description": "Freetext format with dangerous command (tool not extractable)",
+      "payload": "2026-02-27T10:00:02Z [WARN] session=sess-p03 Tool execution: bash \"rm -rf /\"",
+      "expected_rule": "",
+      "attack_type": "",
+      "severity": "",
+      "encoding": "none",
+      "format": "plaintext",
+      "expected_threat": "",
+      "note": "parsePlaintext cannot extract tool from 'Tool execution: bash' format (case-sensitive tool= match). tool=\"\" causes DangerousCmd to return false."
+    },
+    {
+      "id": "PLAIN_RUNAWAY_001",
+      "description": "Agent runaway pattern (max retries exceeded, no tool needed)",
+      "payload": "2026-02-27T10:00:03Z [ERROR] session=sess-p04 max retries exceeded",
+      "expected_rule": "[OPENCLAW Runaway] Agent Runaway Detected",
+      "attack_type": "agent_runaway",
+      "severity": "medium",
+      "encoding": "none",
+      "format": "plaintext",
+      "expected_threat": "agent_runaway",
+      "note": "AgentRunaway detection does not require tool. 'max retries exceeded' pattern matched in args."
+    },
+    {
+      "id": "PLAIN_SHELLINJ_001",
+      "description": "key=value format with shell injection + workspace escape",
+      "payload": "2026-02-27T10:00:04Z [WARN] session=sess-p05 tool=read args=/tmp/file; cat /etc/passwd",
+      "expected_rule": "[OPENCLAW Escape] Workspace Escape Attempt",
+      "attack_type": "workspace_escape",
+      "severity": "high",
+      "encoding": "none",
+      "format": "plaintext",
+      "expected_threat": "workspace_escape",
+      "expected_rules": [
+        "[OPENCLAW Escape] Workspace Escape Attempt",
+        "[OPENCLAW ShellInj] Shell Injection Attempt"
+      ],
+      "note": "Both WE and SI match, but parser priority: WE (3rd) > SI (4th). Falco 0.43.0 fires only 1 rule per event; Escape fires first (appears earlier in rules file)."
+    }
+  ]
+}

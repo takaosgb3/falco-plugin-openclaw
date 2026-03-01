@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Comprehensive E2E test suite with 3 levels (pattern, pipeline, Falco integration)
+- 56 test patterns across 11 categories (7 threat + benign + edge cases + composite + plaintext)
+- Level 3 integration test scripts (inject_patterns.sh, batch_analyzer.py)
+- Allure report generation for visual test results
+- E2E CI workflow (.github/workflows/e2e-test.yml)
+- Makefile E2E targets (e2e, e2e-pattern, e2e-pipeline, e2e-ci, e2e-native, e2e-all)
+- E2E test documentation (e2e/README.md)
+
 ## [0.1.0] - 2026-02-27
 
 ### Added
