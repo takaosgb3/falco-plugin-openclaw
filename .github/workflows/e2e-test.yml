@@ -144,6 +144,10 @@ jobs:
               > "allure-results/history/${f}" 2>/dev/null || true
           done
 
+          # Fetch Rule Mapping Trend history
+          git show "origin/gh-pages:e2e-report/${LATEST}/widgets/rule-mapping-trend-history.json" \
+            > "allure-results/history/rule-mapping-trend-history.json" 2>/dev/null || true
+
           echo "History files retrieved:"
           ls -la allure-results/history/ || true
       - name: Inject Allure metadata
@@ -167,8 +171,42 @@ jobs:
             "buildOrder": ${{ github.run_number }}
           }
           JSON
+      - name: Generate Rule Mapping Trend HTML
+        run: |
+          mkdir -p allure-results/widgets
+          python e2e/scripts/generate_rule_mapping_trend_html.py \
+            --test-results e2e/results/test-results.json \
+            --run-number ${{ github.run_number }} \
+            --report-url "https://takaosgb3.github.io/falco-plugin-openclaw/e2e-report/${{ github.run_number }}/" \
+            --history-input allure-results/history/rule-mapping-trend-history.json \
+            --history-output allure-results/widgets/rule-mapping-trend-history.json \
+            --html-output allure-results/widgets/rule-mapping-trend.html \
+            --max-history 20
       - name: Generate Allure HTML report
         run: allure generate allure-results -o allure-report --clean
+      - name: Merge Rule Mapping into Categories Trend
+        run: |
+          python e2e/scripts/generate_rule_mapping_trend.py \
+            --test-results e2e/results/test-results.json \
+            --run-number ${{ github.run_number }} \
+            --report-url "https://takaosgb3.github.io/falco-plugin-openclaw/e2e-report/${{ github.run_number }}/" \
+            --history-input allure-report/history/categories-trend.json \
+            --history-output allure-report/history/categories-trend.json \
+            --max-history 20 \
+            --verbose || true
+          # Copy merged data to widgets for chart rendering
+          if [ -f allure-report/history/categories-trend.json ]; then
+            mkdir -p allure-report/widgets
+            cp allure-report/history/categories-trend.json allure-report/widgets/categories-trend.json
+          fi
+      - name: Copy Rule Mapping Trend widgets to report
+        run: |
+          if [ -d allure-results/widgets ]; then
+            mkdir -p allure-report/widgets
+            cp -r allure-results/widgets/* allure-report/widgets/
+            echo "Rule Mapping widgets copied:"
+            ls -la allure-report/widgets/
+          fi
       - name: Upload Allure report
         uses: actions/upload-artifact@v4
         with:
@@ -250,7 +288,7 @@ jobs:
           destination_dir: .
           keep_files: true
 
-      # Deploy summary
+      # Deploy summary with Rule Mapping stats
       - name: Deploy summary
         run: |
           RUN_NUM="${{ github.run_number }}"
@@ -261,6 +299,35 @@ jobs:
           | URL | Description |
           |-----|-------------|
           | [Report #${RUN_NUM}](${BASE_URL}/e2e-report/${RUN_NUM}/) | This run's report (immutable) |
+          | [Rule Mapping Trend](${BASE_URL}/e2e-report/${RUN_NUM}/widgets/rule-mapping-trend.html) | Rule verification trend |
           | [Latest](${BASE_URL}/e2e-report/latest/) | Always points to newest report |
           | [Root](${BASE_URL}/) | Landing page redirect |
           TABLE
+
+      - name: Generate Rule Mapping summary
+        run: |
+          # Read Rule Mapping stats from the deployed report widgets
+          HISTORY_FILE="allure-report/widgets/rule-mapping-trend-history.json"
+          if [ -f "$HISTORY_FILE" ]; then
+            CURRENT_RUN=$(jq -r '.[-1]' "$HISTORY_FILE")
+            MATCH=$(echo "$CURRENT_RUN" | jq -r '.data["Rule Match"] // 0')
+            MISMATCH=$(echo "$CURRENT_RUN" | jq -r '.data["Rule Mismatch"] // 0')
+            EXPECTED_NOT=$(echo "$CURRENT_RUN" | jq -r '.data["Expected Not Detected"] // 0')
+            NOT_DEF=$(echo "$CURRENT_RUN" | jq -r '.data["Not Defined"] // 0')
+            TOTAL_RM=$((MATCH + MISMATCH + EXPECTED_NOT + NOT_DEF))
+            if [ "$TOTAL_RM" -gt 0 ]; then
+              MATCH_RATE=$(echo "scale=1; $MATCH * 100 / $TOTAL_RM" | bc)
+              cat >> "$GITHUB_STEP_SUMMARY" <<RULE_MAP
+
+          ### Rule Mapping
+
+          | Status | Count |
+          |--------|-------|
+          | Rule Match | $MATCH |
+          | Rule Mismatch | $MISMATCH |
+          | Expected Not Detected | $EXPECTED_NOT |
+          | Not Defined | $NOT_DEF |
+          | **Match Rate** | **${MATCH_RATE}%** |
+          RULE_MAP
+            fi
+          fi
