@@ -1,0 +1,11 @@
+{
+  "pattern_id": "DANGCMD_DD_001",
+  "category": "dangerous_command",
+  "detected": true,
+  "expected_rule": "[OPENCLAW DangerousCmd] Dangerous Command Execution",
+  "matched_rule": "[OPENCLAW DangerousCmd] Dangerous Command Execution",
+  "rule_match": true,
+  "latency_ms": 0,
+  "evidence": "19:00:02.000000000: Critical [OPENCLAW DangerousCmd] Dangerous command detected (tool=bash args=dd if=/dev/zero of=/dev/sda bs=1M session=DANGCMD_DD_001 source=openclaw-e2e-test.jsonl)",
+  "status": "passed"
+}

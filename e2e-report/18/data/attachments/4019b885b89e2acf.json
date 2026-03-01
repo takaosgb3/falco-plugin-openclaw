@@ -1,0 +1,11 @@
+{
+  "pattern_id": "RUNAWAY_LOOP_001",
+  "category": "agent_runaway",
+  "detected": true,
+  "expected_rule": "[OPENCLAW Runaway] Agent Runaway Detected",
+  "matched_rule": "[OPENCLAW Runaway] Agent Runaway Detected",
+  "rule_match": true,
+  "latency_ms": 0,
+  "evidence": "19:02:00.000000000: Warning [OPENCLAW Runaway] Agent runaway behavior detected (args=while true; do echo loop; done session=RUNAWAY_LOOP_001 suspicious=agent_runaway source=openclaw-e2e-test.jsonl)",
+  "status": "passed"
+}
