@@ -1,0 +1,11 @@
+{
+  "pattern_id": "PLAIN_FREETEXT_DANGER_001",
+  "category": "plaintext_threats",
+  "detected": false,
+  "expected_rule": "",
+  "matched_rule": "",
+  "rule_match": true,
+  "latency_ms": -1,
+  "evidence": "",
+  "status": "passed"
+}

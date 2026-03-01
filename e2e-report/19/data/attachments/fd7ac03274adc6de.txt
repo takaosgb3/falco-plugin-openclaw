@@ -1,0 +1,1 @@
+Test passed: SHELLINJ_PIPE_001
