@@ -226,6 +226,7 @@ get_epoch_ms() {
 }
 
 # ---- Detect library path ----
+# Makefile outputs binary to project root as libopenclaw-plugin-{os}-{arch}.{so|dylib}
 detect_library_path() {
     local os_name
     os_name="$(uname -s)"
@@ -233,18 +234,18 @@ detect_library_path() {
     case "${os_name}" in
         Linux)
             local lib_path
-            lib_path=$(find "${PROJECT_ROOT}/build/" -name "libopenclaw.so" 2>/dev/null | head -1)
+            lib_path=$(find "${PROJECT_ROOT}" -maxdepth 1 -name "libopenclaw-plugin-*.so" 2>/dev/null | head -1)
             if [ -z "${lib_path}" ]; then
-                log_error "Library not found: build/libopenclaw.so (run 'make build' first)"
+                log_error "Library not found: libopenclaw-plugin-*.so in project root (run 'make build' first)"
                 exit 1
             fi
             echo "${lib_path}"
             ;;
         Darwin)
             local lib_path
-            lib_path=$(find "${PROJECT_ROOT}/build/" -name "libopenclaw.dylib" 2>/dev/null | head -1)
+            lib_path=$(find "${PROJECT_ROOT}" -maxdepth 1 -name "libopenclaw-plugin-*.dylib" 2>/dev/null | head -1)
             if [ -z "${lib_path}" ]; then
-                log_error "Library not found: build/libopenclaw.dylib (run 'make build' first)"
+                log_error "Library not found: libopenclaw-plugin-*.dylib in project root (run 'make build' first)"
                 exit 1
             fi
             echo "${lib_path}"

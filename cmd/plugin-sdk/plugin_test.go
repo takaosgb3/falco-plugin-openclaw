@@ -18,22 +18,6 @@ import (
 
 // --- Helper Functions ---
 
-// createTempLogDir creates a temporary directory with log files for testing.
-func createTempLogDir(t *testing.T) (string, []string) {
-	t.Helper()
-	dir := t.TempDir()
-	logFiles := []string{
-		filepath.Join(dir, "agent.jsonl"),
-		filepath.Join(dir, "tools.jsonl"),
-		filepath.Join(dir, "system.log"),
-	}
-	for _, f := range logFiles {
-		err := os.WriteFile(f, []byte(""), 0644)
-		require.NoError(t, err)
-	}
-	return dir, logFiles
-}
-
 // initPlugin creates and initializes a plugin with custom log paths.
 func initPlugin(t *testing.T, logPaths []string) *OpenclawPlugin {
 	t.Helper()

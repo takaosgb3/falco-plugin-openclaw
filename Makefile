@@ -118,7 +118,7 @@ e2e-ci: build
 e2e-native: build
 	mkdir -p $(E2E_RESULTS_DIR)
 	bash $(E2E_SCRIPTS_DIR)/inject_patterns.sh \
-		-c falco-local.yaml \
+		-c $(FALCO_CONFIG) \
 		-p $(E2E_PATTERNS_DIR) \
 		-o $(E2E_RESULTS_DIR)/falco-output.log \
 		-f $(FALCO_BIN_NATIVE)

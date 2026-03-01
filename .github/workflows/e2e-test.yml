@@ -98,6 +98,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - name: Download E2E results
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: e2e-results
@@ -115,6 +116,8 @@ jobs:
           path: allure-report/
           retention-days: 30
 
+  # Deploy only runs when workflow_dispatch is triggered on main branch.
+  # PR events run on the PR branch (not main), so this job is skipped for PRs.
   deploy-pages:
     runs-on: ubuntu-24.04
     needs: [allure-report]

@@ -278,9 +278,14 @@ class BatchAnalyzer:
                 # True negatives: no detection expected
                 return "passed" if not detected else "failed"
         elif category in ("edge_cases", "composite", "plaintext_threats"):
-            # Special categories: check expected_threat field
-            expected_threat = pattern_info.get("expected_threat",
-                                                pattern_info.get("expected_parser_threat", ""))
+            # Special categories: check expected_threat (Falco-level) first,
+            # then expected_parser_threat (parser-level) separately.
+            # These fields have different semantics — expected_threat is the
+            # Falco rule-level expectation, expected_parser_threat is the
+            # parser's DetectThreat() output (may differ due to 10KB truncation).
+            expected_threat = pattern_info.get("expected_threat", "")
+            if not expected_threat:
+                expected_threat = pattern_info.get("expected_parser_threat", "")
             if expected_rules:
                 # Composite: all expected rules must match
                 return "passed" if rule_match else "failed"
