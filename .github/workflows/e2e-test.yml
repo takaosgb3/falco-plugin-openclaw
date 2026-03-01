@@ -128,8 +128,9 @@ jobs:
           git fetch origin gh-pages --depth=1 2>/dev/null || { echo "No gh-pages branch yet, skipping history"; exit 0; }
 
           # Find the latest run number directory
+          # ls-tree returns full paths like "e2e-report/12", so strip the prefix first
           LATEST=$(git ls-tree --name-only origin/gh-pages -- e2e-report/ 2>/dev/null \
-            | grep -E '^[0-9]+$' | sort -n | tail -1) || true
+            | sed 's|^e2e-report/||' | grep -E '^[0-9]+$' | sort -n | tail -1) || true
 
           if [ -z "$LATEST" ]; then
             echo "No previous report found, skipping history"
