@@ -70,6 +70,40 @@ Debug logs are prefixed with `[openclaw-debug]` and include:
 - GOB encoding errors
 - Dropped event counts
 
+## macOS-Specific Notes
+
+On macOS (Falco 0.43.0), the following differences apply:
+
+- **Do NOT include `outputs:` section** (`rate`/`max_burst`). It causes a schema validation error in Falco 0.43.0.
+- **Use `json_output: true`** for structured output.
+- **Required flags**: `--disable-source syscall -U` (see [Installation Guide](installation.md#4-run-falco-1)).
+
+Example macOS config (`falco-local.yaml`):
+
+```yaml
+plugins:
+  - name: openclaw
+    library_path: ./libopenclaw-plugin-darwin-arm64.dylib
+    init_config: |
+      {
+        "log_paths": [
+          "~/.openclaw/logs/agent.jsonl",
+          "~/.openclaw/logs/tools.jsonl",
+          "~/.openclaw/logs/system.log"
+        ]
+      }
+
+load_plugins: [openclaw]
+
+rules_files:
+  - ./rules/openclaw_rules.yaml
+
+stdout_output:
+  enabled: true
+
+json_output: true
+```
+
 ## Configuration Variants
 
 This repository includes 3 configuration files:
@@ -108,3 +142,11 @@ export FALCO_OPENCLAW_DEBUG=true
 ```
 
 デバッグログは `[openclaw-debug]` プレフィックスで出力されます。
+
+## macOS 固有の注意事項
+
+macOS（Falco 0.43.0）では以下の違いがあります:
+
+- **`outputs:` セクションは含めない**: `rate`/`max_burst` は Falco 0.43.0 でスキーマ検証エラーになります
+- **`json_output: true`** を使用してください
+- **必須フラグ**: `--disable-source syscall -U`（詳細は[インストールガイド](installation.md)を参照）
