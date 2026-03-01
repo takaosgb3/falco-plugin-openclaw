@@ -1,0 +1,11 @@
+{
+  "pattern_id": "EDGE_NULLBYTE_001",
+  "category": "edge_cases",
+  "detected": false,
+  "expected_rule": "",
+  "matched_rule": "",
+  "rule_match": true,
+  "latency_ms": -1,
+  "evidence": "",
+  "status": "passed"
+}

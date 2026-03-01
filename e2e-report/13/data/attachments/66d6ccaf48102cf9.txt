@@ -1,0 +1,3 @@
+Expected Rule: [OPENCLAW DangerousCmd] Dangerous Command Execution
+Matched Rule:  [OPENCLAW DangerousCmd] Dangerous Command Execution
+Status: MATCH

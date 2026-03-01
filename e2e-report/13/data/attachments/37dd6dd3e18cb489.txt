@@ -1,0 +1,3 @@
+Expected Rule: [OPENCLAW Model] Unauthorized Model Change
+Matched Rule:  [OPENCLAW Model] Unauthorized Model Change
+Status: MATCH
