@@ -1,0 +1,1 @@
+Test passed: EDGE_NULLBYTE_001

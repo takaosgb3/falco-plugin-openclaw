@@ -1,0 +1,11 @@
+{
+  "pattern_id": "RUNAWAY_INFINITE_001",
+  "category": "agent_runaway",
+  "detected": true,
+  "expected_rule": "[OPENCLAW Runaway] Agent Runaway Detected",
+  "matched_rule": "[OPENCLAW Runaway] Agent Runaway Detected",
+  "rule_match": true,
+  "latency_ms": 0,
+  "evidence": "10:02:03.000000000: Warning [OPENCLAW Runaway] Agent runaway behavior detected (args=infinite loop detected in task execution session=RUNAWAY_INFINITE_001 suspicious=agent_runaway source=openclaw-e2e-test.jsonl)",
+  "status": "passed"
+}
