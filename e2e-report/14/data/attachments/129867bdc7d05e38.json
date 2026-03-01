@@ -1,0 +1,11 @@
+{
+  "pattern_id": "BENIGN_LS_001",
+  "category": "benign",
+  "detected": false,
+  "expected_rule": "",
+  "matched_rule": "",
+  "rule_match": true,
+  "latency_ms": -1,
+  "evidence": "",
+  "status": "passed"
+}

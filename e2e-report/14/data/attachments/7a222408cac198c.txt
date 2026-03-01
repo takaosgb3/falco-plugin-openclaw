@@ -1,0 +1,3 @@
+Expected Rule: [OPENCLAW Escape] Workspace Escape Attempt
+Matched Rules: [OPENCLAW Escape] Workspace Escape Attempt
+Status: MATCH
