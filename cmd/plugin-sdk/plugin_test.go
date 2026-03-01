@@ -191,7 +191,7 @@ func TestPipelineOpenSeekEnd(t *testing.T) {
 
 	// Write existing content before Open
 	existingLine := `{"type":"tool_call","tool":"bash","args":"echo existing","session_id":"sess-old","timestamp":"2026-02-27T10:00:00Z"}`
-	err := os.WriteFile(logPath, []byte(existingLine+"\n"), 0644)
+	err := os.WriteFile(logPath, []byte(existingLine+"\n"), 0600)
 	require.NoError(t, err)
 
 	p := initPlugin(t, []string{logPath})
@@ -220,7 +220,7 @@ func TestPipelineOpenSeekEnd(t *testing.T) {
 func TestPipelineClose(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "close.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst, err := p.Open("")
@@ -244,7 +244,7 @@ func TestPipelineClose(t *testing.T) {
 // Note: Extract() switch coverage requires Falco SDK mocks (Level 3 scope).
 func TestPipelineFieldsExtractConsistency(t *testing.T) {
 	p := &OpenclawPlugin{}
-	p.Init("")
+	_ = p.Init("")
 
 	fields := p.Fields()
 	assert.Len(t, fields, 13, "Must have exactly 13 fields")
@@ -303,7 +303,7 @@ func TestPipelineFieldsExtractConsistency(t *testing.T) {
 func TestPipelineJSONIngestion(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "agent.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -324,7 +324,7 @@ func TestPipelineJSONIngestion(t *testing.T) {
 func TestPipelinePlaintextIngestion(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "system.log")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -341,7 +341,7 @@ func TestPipelinePlaintextIngestion(t *testing.T) {
 func TestPipelineMultiLineWrite(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "multi.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -356,7 +356,7 @@ func TestPipelineMultiLineWrite(t *testing.T) {
 	f, err := os.OpenFile(logPath, os.O_APPEND|os.O_WRONLY, 0644)
 	require.NoError(t, err)
 	for _, line := range lines {
-		f.WriteString(line + "\n")
+		_, _ = f.WriteString(line + "\n")
 	}
 	f.Close()
 
@@ -387,7 +387,7 @@ func TestPipelineMultiFileWatch(t *testing.T) {
 		filepath.Join(dir, "file3.jsonl"),
 	}
 	for _, f := range files {
-		os.WriteFile(f, []byte(""), 0644)
+		_ = os.WriteFile(f, []byte(""), 0600)
 	}
 
 	p := initPlugin(t, files)
@@ -463,7 +463,7 @@ func TestPipelineGOBRoundTrip(t *testing.T) {
 func TestPipelineHeadersNonNil(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "headers.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -485,7 +485,7 @@ func TestPipelineHeadersNonNil(t *testing.T) {
 func TestPipelineHeadersCopy(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "hdr-copy.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -504,7 +504,7 @@ func TestPipelineHeadersFieldExists(t *testing.T) {
 	// Note: P012 (header key lowercase) is enforced in Extract(), tested implicitly
 	// via TC-2-07 (TestPipelineHeadersCopy) which verifies header key round-trip.
 	p := &OpenclawPlugin{}
-	p.Init("")
+	_ = p.Init("")
 
 	fields := p.Fields()
 	var headersField *struct{ Name string }
@@ -521,7 +521,7 @@ func TestPipelineHeadersFieldExists(t *testing.T) {
 func TestPipelineTimestampFormats(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "ts.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -550,9 +550,9 @@ func TestPipelineTimestampFormats(t *testing.T) {
 func TestPipelineSourceFile(t *testing.T) {
 	dir := t.TempDir()
 	subdir := filepath.Join(dir, "deep", "nested")
-	os.MkdirAll(subdir, 0755)
+	_ = os.MkdirAll(subdir, 0755)
 	logPath := filepath.Join(subdir, "agent.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -568,7 +568,7 @@ func TestPipelineSourceFile(t *testing.T) {
 func TestPipelineEmptyLineSkip(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "empty.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -576,9 +576,9 @@ func TestPipelineEmptyLineSkip(t *testing.T) {
 	// Write empty lines followed by a valid line
 	f, err := os.OpenFile(logPath, os.O_APPEND|os.O_WRONLY, 0644)
 	require.NoError(t, err)
-	f.WriteString("\n")
-	f.WriteString("\n")
-	f.WriteString(`{"type":"tool_call","tool":"bash","args":"after-empty","session_id":"sess-el-001","timestamp":"2026-02-27T10:00:00Z"}` + "\n")
+	_, _ = f.WriteString("\n")
+	_, _ = f.WriteString("\n")
+	_, _ = f.WriteString(`{"type":"tool_call","tool":"bash","args":"after-empty","session_id":"sess-el-001","timestamp":"2026-02-27T10:00:00Z"}` + "\n")
 	f.Close()
 
 	evt := waitForEvent(t, inst.eventCh, 5*time.Second)
@@ -589,7 +589,7 @@ func TestPipelineEmptyLineSkip(t *testing.T) {
 func TestPipelineFsnotifyWrite(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "fsn.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -610,7 +610,7 @@ func TestPipelineFsnotifyWrite(t *testing.T) {
 func TestPipelineThroughput(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "throughput.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -622,7 +622,7 @@ func TestPipelineThroughput(t *testing.T) {
 	require.NoError(t, err)
 	for i := 0; i < numLines; i++ {
 		line := fmt.Sprintf(`{"type":"tool_call","tool":"bash","args":"cmd-%d","session_id":"sess-tp-%d","timestamp":"2026-02-27T10:00:00Z"}`, i, i)
-		f.WriteString(line + "\n")
+		_, _ = f.WriteString(line + "\n")
 	}
 	f.Close()
 
@@ -648,7 +648,7 @@ func TestPipelineThroughput(t *testing.T) {
 func TestPipelineBufferOverflow(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "overflow.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	// Use small buffer
 	p := &OpenclawPlugin{}
@@ -662,7 +662,7 @@ func TestPipelineBufferOverflow(t *testing.T) {
 	require.NoError(t, err)
 	for i := 0; i < 10; i++ {
 		line := fmt.Sprintf(`{"type":"tool_call","tool":"bash","args":"overflow-%d","session_id":"sess-of-%d","timestamp":"2026-02-27T10:00:00Z"}`, i, i)
-		f.WriteString(line + "\n")
+		_, _ = f.WriteString(line + "\n")
 	}
 	f.Close()
 
@@ -678,7 +678,7 @@ func TestPipelineBufferOverflow(t *testing.T) {
 func TestPipelineDropCount(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "drop.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := &OpenclawPlugin{}
 	cfg := fmt.Sprintf(`{"log_paths": ["%s"], "event_buffer_size": 1}`, logPath)
@@ -691,7 +691,7 @@ func TestPipelineDropCount(t *testing.T) {
 	require.NoError(t, err)
 	for i := 0; i < 20; i++ {
 		line := fmt.Sprintf(`{"type":"tool_call","tool":"bash","args":"drop-%d","session_id":"sess-dr-%d","timestamp":"2026-02-27T10:00:00Z"}`, i, i)
-		f.WriteString(line + "\n")
+		_, _ = f.WriteString(line + "\n")
 	}
 	f.Close()
 
@@ -709,7 +709,7 @@ func TestPipelineDropCount(t *testing.T) {
 func TestPipelineLargeInput(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "large.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -731,7 +731,7 @@ func TestPipelineLongRunning(t *testing.T) {
 
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "longrun.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -778,7 +778,7 @@ func TestPipelineLongRunning(t *testing.T) {
 func TestPipelineInvalidJSON(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "invalid.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -786,8 +786,8 @@ func TestPipelineInvalidJSON(t *testing.T) {
 	// Write invalid JSON followed by valid JSON
 	f, err := os.OpenFile(logPath, os.O_APPEND|os.O_WRONLY, 0644)
 	require.NoError(t, err)
-	f.WriteString("{invalid json\n")
-	f.WriteString(`{"type":"tool_call","tool":"bash","args":"after-invalid","session_id":"sess-ij-001","timestamp":"2026-02-27T10:00:00Z"}` + "\n")
+	_, _ = f.WriteString("{invalid json\n")
+	_, _ = f.WriteString(`{"type":"tool_call","tool":"bash","args":"after-invalid","session_id":"sess-ij-001","timestamp":"2026-02-27T10:00:00Z"}` + "\n")
 	f.Close()
 
 	// Should still receive the valid event (no crash)
@@ -799,15 +799,15 @@ func TestPipelineInvalidJSON(t *testing.T) {
 func TestPipelineEmptyLine(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "emptyline.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
 
 	f, err := os.OpenFile(logPath, os.O_APPEND|os.O_WRONLY, 0644)
 	require.NoError(t, err)
-	f.WriteString("\n\n\n")
-	f.WriteString(`{"type":"tool_call","tool":"bash","args":"after-empty-lines","session_id":"sess-el2-001","timestamp":"2026-02-27T10:00:00Z"}` + "\n")
+	_, _ = f.WriteString("\n\n\n")
+	_, _ = f.WriteString(`{"type":"tool_call","tool":"bash","args":"after-empty-lines","session_id":"sess-el2-001","timestamp":"2026-02-27T10:00:00Z"}` + "\n")
 	f.Close()
 
 	evt := waitForEvent(t, inst.eventCh, 5*time.Second)
@@ -818,7 +818,7 @@ func TestPipelineEmptyLine(t *testing.T) {
 func TestPipelineSuperLongLine(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "superlong.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -827,8 +827,8 @@ func TestPipelineSuperLongLine(t *testing.T) {
 	megaArgs := strings.Repeat("X", 1024*1024)
 	f, err := os.OpenFile(logPath, os.O_APPEND|os.O_WRONLY, 0644)
 	require.NoError(t, err)
-	f.WriteString(fmt.Sprintf(`{"type":"tool_call","tool":"bash","args":"%s","session_id":"sess-sl-001","timestamp":"2026-02-27T10:00:00Z"}`, megaArgs) + "\n")
-	f.WriteString(`{"type":"tool_call","tool":"bash","args":"after-superlong","session_id":"sess-sl-002","timestamp":"2026-02-27T10:00:01Z"}` + "\n")
+	_, _ = f.WriteString(fmt.Sprintf(`{"type":"tool_call","tool":"bash","args":"%s","session_id":"sess-sl-001","timestamp":"2026-02-27T10:00:00Z"}`, megaArgs) + "\n")
+	_, _ = f.WriteString(`{"type":"tool_call","tool":"bash","args":"after-superlong","session_id":"sess-sl-002","timestamp":"2026-02-27T10:00:01Z"}` + "\n")
 	f.Close()
 
 	// Should handle without crash — collect events
@@ -851,7 +851,7 @@ func TestPipelineSuperLongLine(t *testing.T) {
 func TestPipelineFileDeleted(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "deleteme.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -873,7 +873,7 @@ func TestPipelineFileDeleted(t *testing.T) {
 func TestPipelineFileRecreated(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "recreate.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -883,7 +883,7 @@ func TestPipelineFileRecreated(t *testing.T) {
 	// to detect REMOVE then CREATE events and update internal state.
 	os.Remove(logPath)
 	time.Sleep(500 * time.Millisecond)
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 	time.Sleep(500 * time.Millisecond)
 
 	// Plugin should not crash
@@ -898,8 +898,8 @@ func TestPipelinePermissionError(t *testing.T) {
 
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "noperm.jsonl")
-	os.WriteFile(logPath, []byte(""), 0000)
-	defer os.Chmod(logPath, 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0000)
+	defer func() { _ = os.Chmod(logPath, 0644) }()
 
 	p := &OpenclawPlugin{}
 	cfg := fmt.Sprintf(`{"log_paths": ["%s"]}`, logPath)
@@ -949,7 +949,7 @@ func TestPipelineGOBDecodeError(t *testing.T) {
 func TestPipelineUnknownField(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "unknown.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -966,7 +966,7 @@ func TestPipelineUnknownField(t *testing.T) {
 func TestPipelineBinaryData(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "binary.jsonl")
-	os.WriteFile(logPath, []byte(""), 0644)
+	_ = os.WriteFile(logPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{logPath})
 	inst := openAndCleanup(t, p)
@@ -974,8 +974,8 @@ func TestPipelineBinaryData(t *testing.T) {
 	// Write binary-like data followed by valid JSON
 	f, err := os.OpenFile(logPath, os.O_APPEND|os.O_WRONLY, 0644)
 	require.NoError(t, err)
-	f.Write([]byte{0x00, 0x01, 0x02, 0xFF, 0xFE, '\n'})
-	f.WriteString(`{"type":"tool_call","tool":"bash","args":"after-binary","session_id":"sess-bin-001","timestamp":"2026-02-27T10:00:00Z"}` + "\n")
+	_, _ = f.Write([]byte{0x00, 0x01, 0x02, 0xFF, 0xFE, '\n'})
+	_, _ = f.WriteString(`{"type":"tool_call","tool":"bash","args":"after-binary","session_id":"sess-bin-001","timestamp":"2026-02-27T10:00:00Z"}` + "\n")
 	f.Close()
 
 	// Should not crash, should eventually get the valid event
@@ -998,8 +998,8 @@ func TestPipelineNonTargetFile(t *testing.T) {
 	dir := t.TempDir()
 	targetPath := filepath.Join(dir, "target.jsonl")
 	nonTargetPath := filepath.Join(dir, "other.txt")
-	os.WriteFile(targetPath, []byte(""), 0644)
-	os.WriteFile(nonTargetPath, []byte(""), 0644)
+	_ = os.WriteFile(targetPath, []byte(""), 0600)
+	_ = os.WriteFile(nonTargetPath, []byte(""), 0600)
 
 	p := initPlugin(t, []string{targetPath})
 	inst := openAndCleanup(t, p)

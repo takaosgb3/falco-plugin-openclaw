@@ -61,7 +61,7 @@ func loadAllPatterns(t *testing.T) []PatternFile {
 	entries, err := os.ReadDir(dir)
 	require.NoError(t, err, "Failed to read patterns directory")
 
-	var files []PatternFile
+	files := make([]PatternFile, 0, len(entries))
 	for _, entry := range entries {
 		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") {
 			continue

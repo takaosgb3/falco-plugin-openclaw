@@ -230,11 +230,12 @@ func (p *Parser) parsePlaintext(line string) (*LogEntry, error) {
 
 	// Detect event type from log content
 	lower := strings.ToLower(rest)
-	if strings.Contains(lower, "tool execution") || strings.Contains(lower, "tool_call") {
+	switch {
+	case strings.Contains(lower, "tool execution") || strings.Contains(lower, "tool_call"):
 		entry.Type = "tool_call"
-	} else if strings.Contains(lower, "config") {
+	case strings.Contains(lower, "config"):
 		entry.Type = "config_change"
-	} else if strings.Contains(lower, "message") || strings.Contains(lower, "user") {
+	case strings.Contains(lower, "message") || strings.Contains(lower, "user"):
 		entry.Type = "message"
 	}
 
