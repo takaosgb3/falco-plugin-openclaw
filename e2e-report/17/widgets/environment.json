@@ -1,1 +1,1 @@
-[{"values":["falco-plugin-openclaw"],"name":"Plugin"},{"values":["Local (macOS)"],"name":"Runner"},{"values":["17"],"name":"Run.Number"},{"values":["main"],"name":"Branch"},{"values":["32104efb53d82e4595799b78d5fde81cbfed7d1c"],"name":"Commit"}]
+[{"values":["falco-plugin-openclaw"],"name":"Plugin"},{"values":["GitHub Actions"],"name":"Runner"},{"values":["17"],"name":"Run.Number"},{"values":["22539173656"],"name":"Run.ID"},{"values":["main"],"name":"Branch"},{"values":["32104efb53d82e4595799b78d5fde81cbfed7d1c"],"name":"Commit"}]

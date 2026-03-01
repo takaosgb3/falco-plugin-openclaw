@@ -1,0 +1,3 @@
+Expected Rule: [OPENCLAW Runaway] Agent Runaway Detected
+Matched Rule: [OPENCLAW Runaway] Agent Runaway Detected
+Rule Match: ✅ Match
