@@ -1,0 +1,11 @@
+{
+  "pattern_id": "PLAIN_RUNAWAY_001",
+  "category": "plaintext_threats",
+  "detected": true,
+  "expected_rule": "[OPENCLAW Runaway] Agent Runaway Detected",
+  "matched_rule": "[OPENCLAW Runaway] Agent Runaway Detected",
+  "rule_match": true,
+  "latency_ms": 0,
+  "evidence": "10:00:03.000000000: Warning [OPENCLAW Runaway] Agent runaway behavior detected (args=session=PLAIN_RUNAWAY_001 max retries exceeded session=PLAIN_RUNAWAY_001 suspicious=agent_runaway source=openclaw-e2e-test.jsonl)",
+  "status": "passed"
+}

@@ -1,0 +1,3 @@
+Expected Rule: [OPENCLAW ShellInj] Shell Injection Attempt
+Matched Rule:  [OPENCLAW ShellInj] Shell Injection Attempt
+Status: MATCH
